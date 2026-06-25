@@ -1,72 +1,48 @@
-import type {
-  SendEmailOptions,
-  SendEmailResponse,
-  ListEmailsOptions,
-  Email,
-  ApiError,
-} from './types';
+import { TrattoError } from './error';
+import { EmailsResource } from './resources/emails';
+import { ContactsResource } from './resources/contacts';
+import { AudiencesResource } from './resources/audiences';
+import { CampaignsResource } from './resources/campaigns';
+import { TemplatesResource } from './resources/templates';
+import { WebhooksResource } from './resources/webhooks';
+import { DomainsResource } from './resources/domains';
+import { ApiKeysResource } from './resources/api-keys';
+import { AnalyticsResource } from './resources/analytics';
+import { FlowsResource } from './resources/flows';
+import { WorkspaceResource } from './resources/workspace';
 
-const DEFAULT_BASE_URL = 'https://api.tratto.email';
-
-export class TrattoError extends Error {
-  constructor(
-    message: string,
-    public readonly code: string,
-    public readonly statusCode: number,
-  ) {
-    super(message);
-    this.name = 'TrattoError';
-  }
+export interface TrattoOptions {
+  baseUrl?: string;
 }
 
 export class Tratto {
-  readonly #apiKey: string;
-  readonly #baseUrl: string;
+  readonly emails: EmailsResource;
+  readonly contacts: ContactsResource;
+  readonly audiences: AudiencesResource;
+  readonly campaigns: CampaignsResource;
+  readonly templates: TemplatesResource;
+  readonly webhooks: WebhooksResource;
+  readonly domains: DomainsResource;
+  readonly apiKeys: ApiKeysResource;
+  readonly analytics: AnalyticsResource;
+  readonly flows: FlowsResource;
+  readonly workspace: WorkspaceResource;
 
-  constructor(apiKey: string, options?: { baseUrl?: string }) {
+  constructor(apiKey: string, options?: TrattoOptions) {
     if (!apiKey) throw new Error('apiKey is required');
-    this.#apiKey = apiKey;
-    this.#baseUrl = options?.baseUrl ?? DEFAULT_BASE_URL;
+    const baseUrl = (options?.baseUrl ?? 'https://api.tratto.email').replace(/\/$/, '');
+    this.emails = new EmailsResource(apiKey, baseUrl);
+    this.contacts = new ContactsResource(apiKey, baseUrl);
+    this.audiences = new AudiencesResource(apiKey, baseUrl);
+    this.campaigns = new CampaignsResource(apiKey, baseUrl);
+    this.templates = new TemplatesResource(apiKey, baseUrl);
+    this.webhooks = new WebhooksResource(apiKey, baseUrl);
+    this.domains = new DomainsResource(apiKey, baseUrl);
+    this.apiKeys = new ApiKeysResource(apiKey, baseUrl);
+    this.analytics = new AnalyticsResource(apiKey, baseUrl);
+    this.flows = new FlowsResource(apiKey, baseUrl);
+    this.workspace = new WorkspaceResource(apiKey, baseUrl);
   }
-
-  async #request<T>(method: string, path: string, body?: unknown): Promise<T> {
-    const res = await fetch(`${this.#baseUrl}${path}`, {
-      method,
-      headers: {
-        Authorization: `Bearer ${this.#apiKey}`,
-        'Content-Type': 'application/json',
-        'User-Agent': '@tratto/email/0.1.0',
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-
-    const data = await res.json() as { data?: T; error?: ApiError };
-
-    if (!res.ok) {
-      throw new TrattoError(
-        data.error?.message ?? res.statusText,
-        data.error?.code ?? 'unknown_error',
-        res.status,
-      );
-    }
-
-    return data.data as T;
-  }
-
-  readonly emails = {
-    send: (options: SendEmailOptions): Promise<SendEmailResponse> =>
-      this.#request('POST', '/v1/emails', options),
-
-    list: (options?: ListEmailsOptions): Promise<{ data: Email[]; pagination: { hasMore: boolean; nextCursor?: string } }> => {
-      const params = new URLSearchParams();
-      if (options?.status) params.set('status', options.status);
-      if (options?.limit) params.set('limit', String(options.limit));
-      if (options?.after) params.set('after', options.after);
-      const qs = params.toString();
-      return this.#request('GET', `/v1/emails${qs ? `?${qs}` : ''}`);
-    },
-
-    get: (id: string): Promise<Email> =>
-      this.#request('GET', `/v1/emails/${id}`),
-  };
 }
+
+export { TrattoError };

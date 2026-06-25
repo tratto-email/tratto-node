@@ -1,8 +1,90 @@
-export { Tratto } from './client';
+export { Tratto, TrattoError } from './client';
+export type { TrattoOptions } from './client';
+
 export type {
-  SendEmailOptions,
-  SendEmailResponse,
-  ListEmailsOptions,
-  Email,
-  ApiError,
+  // Shared
+  Pagination,
+  PaginatedResponse,
+  // Emails
+  SendEmailParams,
+  ListEmailsParams,
+  EmailSummary,
+  EmailEvent,
+  EmailDetail,
+  // Contacts
+  ContactStatus,
+  Contact,
+  CreateContactParams,
+  UpdateContactParams,
+  ListContactsParams,
+  ImportJobStatus,
+  // Audiences
+  AudienceRuleOperator,
+  AudienceRule,
+  Audience,
+  CreateAudienceParams,
+  ListAudiencesParams,
+  AddContactsToAudienceResult,
+  // Campaigns
+  CampaignStatus,
+  CampaignStats,
+  Campaign,
+  CampaignStatsDetail,
+  CreateCampaignParams,
+  ListCampaignsParams,
+  SendCampaignParams,
+  // Templates
+  TemplateStatus,
+  TemplateSummary,
+  Template,
+  CreateTemplateParams,
+  UpdateTemplateParams,
+  ListTemplatesParams,
+  TemplateVersionSummary,
+  TemplateVersion,
+  // Webhooks
+  WebhookEventType,
+  WebhookStatus,
+  WebhookDeliveryStatus,
+  Webhook,
+  WebhookDelivery,
+  CreateWebhookParams,
+  ListWebhookDeliveriesParams,
+  // Domains
+  DomainStatus,
+  DomainRecord,
+  DomainSummary,
+  Domain,
+  ListDomainsParams,
+  // API Keys
+  ApiKeyEnv,
+  ApiKey,
+  ApiKeyCreated,
+  CreateApiKeyParams,
+  ListApiKeysParams,
+  // Analytics
+  AnalyticsPeriod,
+  AnalyticsSummary,
+  TimeseriesPoint,
+  // Flows
+  FlowStatus,
+  FlowTriggerType,
+  FlowStepType,
+  FlowTrigger,
+  FlowStep,
+  Flow,
+  CreateFlowParams,
+  UpdateFlowParams,
+  ListFlowsParams,
+  // Workspace
+  WorkspacePlan,
+  WorkspaceMemberRole,
+  WorkspaceLocale,
+  Workspace,
+  WorkspaceMember,
+  WorkspacePreferences,
+  UpdateWorkspaceParams,
+  UpdateWorkspacePreferencesParams,
+  InviteMemberParams,
+  UpdateMemberParams,
 } from './types';

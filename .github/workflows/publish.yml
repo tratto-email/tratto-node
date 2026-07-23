@@ -7,6 +7,11 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # Must match the "production" environment configured on the npm Trusted
+    # Publisher settings for @tratto/email — the OIDC token's claims
+    # include this environment name, and npm validates it against that
+    # config. Same pattern as tratto-angular and tratto-react.
+    environment: production
     permissions:
       contents: read
       id-token: write
@@ -17,7 +22,12 @@ jobs:
           node-version: '22'
           registry-url: https://registry.npmjs.org
       - run: npm ci
+      # npm Trusted Publishing (OIDC) requires npm CLI >= 11.5.1. Don't rely
+      # on whatever ships with the pinned Node version — pin it explicitly.
+      - run: npm install -g npm@latest
+      - run: npm --version
       - run: npm run build
+      # No NODE_AUTH_TOKEN: this publishes via npm Trusted Publishing (OIDC).
+      # npmjs.com must have this repo/workflow/environment registered as a
+      # trusted publisher for @tratto/email — see docs.npmjs.com/trusted-publishers.
       - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

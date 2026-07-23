@@ -33,6 +33,14 @@ describe('DomainsResource', () => {
     expect(result.data).toHaveLength(1);
   });
 
+  it('list() GETs /v1/domains with query params', async () => {
+    vi.stubGlobal('fetch', mock({ data: [DOMAIN], pagination: { hasMore: false, nextCursor: null } }));
+    await tratto.domains.list({ after: 'dom_1', limit: 10 });
+    const [url] = fetchCalls()[0] as [string];
+    expect(url).toContain('after=dom_1');
+    expect(url).toContain('limit=10');
+  });
+
   it('get() GETs /v1/domains/:id', async () => {
     vi.stubGlobal('fetch', mock({ data: DOMAIN }));
     await tratto.domains.get('dom_1');

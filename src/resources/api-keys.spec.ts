@@ -37,6 +37,14 @@ describe('ApiKeysResource', () => {
     expect(result.data).toEqual([]);
   });
 
+  it('list() GETs /v1/api-keys with query params', async () => {
+    vi.stubGlobal('fetch', mock({ data: [], pagination: { hasMore: false, nextCursor: null } }));
+    await tratto.apiKeys.list({ after: 'key_1', limit: 10 });
+    const [url] = fetchCalls()[0] as [string];
+    expect(url).toContain('after=key_1');
+    expect(url).toContain('limit=10');
+  });
+
   it('revoke() DELETEs /v1/api-keys/:id and returns id + revokedAt', async () => {
     vi.stubGlobal('fetch', mock({ data: { id: 'key_1', revokedAt: '2025-01-01T00:00:00Z' } }));
     const result = await tratto.apiKeys.revoke('key_1');

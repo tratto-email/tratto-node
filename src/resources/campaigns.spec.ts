@@ -65,6 +65,14 @@ describe('CampaignsResource', () => {
     expect(body['scheduledAt']).toBe('2025-07-01T09:00:00.000Z');
   });
 
+  it('send() passes scheduledAt through unchanged when it is already a string', async () => {
+    vi.stubGlobal('fetch', mock({ data: { status: 'scheduled' } }));
+    await tratto.campaigns.send('cmp_1', { scheduledAt: '2025-07-01T09:00:00.000Z' });
+    const [, init] = fetchCalls()[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string) as Record<string, unknown>;
+    expect(body['scheduledAt']).toBe('2025-07-01T09:00:00.000Z');
+  });
+
   it('pause() POSTs to /v1/campaigns/:id/pause', async () => {
     vi.stubGlobal('fetch', mock({ data: { status: 'paused' } }));
     await tratto.campaigns.pause('cmp_1');

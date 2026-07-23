@@ -422,6 +422,9 @@ See the [`examples/`](examples/) folder:
 | [`campaign.ts`](examples/campaign.ts) | Create, configure, and send a marketing campaign |
 | [`analytics.ts`](examples/analytics.ts) | Fetch delivery metrics and daily timeseries |
 | [`webhook.ts`](examples/webhook.ts) | Register a webhook and inspect delivery history |
+| [`nextjs.ts`](examples/nextjs.ts) | Next.js App Router route handler sending a welcome email |
+| [`express.ts`](examples/express.ts) | Express route sending a password-reset email |
+| [`fastify.ts`](examples/fastify.ts) | Fastify route sending an order-confirmation email via template |
 
 Run any example with [tsx](https://github.com/privatenumber/tsx):
 

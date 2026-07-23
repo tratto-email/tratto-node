@@ -22,6 +22,14 @@ describe('FlowsResource', () => {
     expect(result.data).toHaveLength(1);
   });
 
+  it('list() GETs /v1/flows with query params', async () => {
+    vi.stubGlobal('fetch', mock({ data: [FLOW], pagination: { hasMore: false, nextCursor: null } }));
+    await tratto.flows.list({ after: 'flw_1', limit: 10 });
+    const [url] = fetchCalls()[0] as [string];
+    expect(url).toContain('after=flw_1');
+    expect(url).toContain('limit=10');
+  });
+
   it('create() POSTs to /v1/flows', async () => {
     vi.stubGlobal('fetch', mock({ data: { id: 'flw_1' } }));
     const result = await tratto.flows.create({ name: 'Welcome' });

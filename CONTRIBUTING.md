@@ -4,6 +4,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ## Table of contents
 
+- [Code of Conduct](#code-of-conduct)
 - [Prerequisites](#prerequisites)
 - [Local setup](#local-setup)
 - [Project structure](#project-structure)
@@ -14,6 +15,12 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - [Release process](#release-process)
 
 ---
+
+## Code of Conduct
+
+This project follows the [Contributor Covenant](./CODE_OF_CONDUCT.md). Be
+respectful and constructive in issues, pull requests, and all other project
+communication.
 
 ## Prerequisites
 

@@ -51,6 +51,45 @@ const tratto = new Tratto(apiKey, options?);
 
 ---
 
+## Test mode
+
+Every workspace can create **test API keys** (`tratto_test_…`) alongside live ones. A test key runs the exact same pipeline — statuses, email timeline, webhooks — but **nothing is actually delivered**: no domain verification needed, no monthly quota consumed (test sends have their own daily cap).
+
+```ts
+const tratto = new Tratto('tratto_test_...');
+
+// Works immediately, even with an unverified sender domain
+const { id, livemode } = await tratto.emails.send({
+  from: 'Acme <hello@any-domain.dev>',
+  to: 'delivered@simulator.tratto.email',
+  subject: 'Hello from test mode',
+  html: '<p>It works!</p>',
+});
+// livemode === false
+```
+
+### Simulator addresses
+
+The recipient address picks the outcome (any other address simulates a normal delivery):
+
+| Recipient | Outcome |
+|---|---|
+| `delivered@simulator.tratto.email` | `delivered` event |
+| `bounced@simulator.tratto.email` | permanent bounce → email ends `failed` |
+| `soft-bounced@simulator.tratto.email` | transient bounce |
+| `complained@simulator.tratto.email` | spam complaint event |
+
+### What to expect
+
+- Responses and webhook payloads carry `livemode: false` so your integration can tell test traffic apart.
+- A test key only ever sees test data: listing or fetching emails created with a live key returns 404/empty, and vice versa.
+- Test emails are retained for 7 days.
+- Endpoints that reach real recipients (campaign send, template test-send, flow activation) reject test keys with `403 TEST_MODE_NOT_SUPPORTED`.
+
+Switching to production is a one-line change: swap the key for a `tratto_live_…` one (verified sender domain required).
+
+---
+
 ## API Reference
 
 All methods return `Promise<T>`. Use `async/await` or `.then()`.

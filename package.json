@@ -1,7 +1,7 @@
 {
   "name": "@tratto/email",
-  "version": "0.1.0",
-  "description": "Tratto Node.js SDK — send transactional and marketing email",
+  "version": "1.0.0",
+  "description": "Tratto Node.js SDK \u2014 send transactional and marketing email",
   "author": "Tratto <hello@tratto.email>",
   "license": "MIT",
   "homepage": "https://tratto.email",
@@ -22,7 +22,9 @@
       "require": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",

@@ -6,7 +6,6 @@ import { CampaignsResource } from './resources/campaigns';
 import { TemplatesResource } from './resources/templates';
 import { WebhooksResource } from './resources/webhooks';
 import { DomainsResource } from './resources/domains';
-import { ApiKeysResource } from './resources/api-keys';
 import { AnalyticsResource } from './resources/analytics';
 import { FlowsResource } from './resources/flows';
 import { WorkspaceResource } from './resources/workspace';
@@ -23,7 +22,6 @@ export class Tratto {
   readonly templates: TemplatesResource;
   readonly webhooks: WebhooksResource;
   readonly domains: DomainsResource;
-  readonly apiKeys: ApiKeysResource;
   readonly analytics: AnalyticsResource;
   readonly flows: FlowsResource;
   readonly workspace: WorkspaceResource;
@@ -38,7 +36,6 @@ export class Tratto {
     this.templates = new TemplatesResource(apiKey, baseUrl);
     this.webhooks = new WebhooksResource(apiKey, baseUrl);
     this.domains = new DomainsResource(apiKey, baseUrl);
-    this.apiKeys = new ApiKeysResource(apiKey, baseUrl);
     this.analytics = new AnalyticsResource(apiKey, baseUrl);
     this.flows = new FlowsResource(apiKey, baseUrl);
     this.workspace = new WorkspaceResource(apiKey, baseUrl);

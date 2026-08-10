@@ -315,26 +315,6 @@ const { deletedAt } = await tratto.domains.delete(domain.id);
 
 ---
 
-### API Keys
-
-```ts
-// Create — raw key is shown only once
-const key = await tratto.apiKeys.create({
-  name: 'CI deployment key',
-  env: 'live',
-  permissions: ['emails:send'],
-});
-console.log('Raw key (save this!):', key.key);
-
-// List (prefix only, never raw token)
-const { data } = await tratto.apiKeys.list();
-
-// Revoke
-const { revokedAt } = await tratto.apiKeys.revoke(key.id);
-```
-
----
-
 ### Analytics
 
 ```ts

@@ -341,34 +341,6 @@ export interface ListDomainsParams {
 
 // ── API Keys ──────────────────────────────────────────────────────────────────
 
-export type ApiKeyEnv = 'live' | 'test';
-
-export interface ApiKey {
-  id: string;
-  name: string;
-  prefix: string;
-  env: ApiKeyEnv;
-  permissions: string[];
-  createdAt: string;
-  lastUsedAt: string | null;
-  revokedAt: string | null;
-}
-
-export interface ApiKeyCreated extends ApiKey {
-  key: string;
-}
-
-export interface CreateApiKeyParams {
-  name: string;
-  env: ApiKeyEnv;
-  permissions: string[];
-}
-
-export interface ListApiKeysParams {
-  after?: string;
-  limit?: number;
-}
-
 // ── Analytics ─────────────────────────────────────────────────────────────────
 
 export type AnalyticsPeriod = '7d' | '30d' | '90d';

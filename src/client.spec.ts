@@ -19,10 +19,12 @@ describe('Tratto', () => {
     expect(tratto.templates).toBeDefined();
     expect(tratto.webhooks).toBeDefined();
     expect(tratto.domains).toBeDefined();
-    expect(tratto.apiKeys).toBeDefined();
     expect(tratto.analytics).toBeDefined();
     expect(tratto.flows).toBeDefined();
     expect(tratto.workspace).toBeDefined();
+    // API key management is deliberately not part of the SDK: keys are issued
+    // and scoped from the dashboard, never from application code.
+    expect((tratto as unknown as Record<string, unknown>)['apiKeys']).toBeUndefined();
   });
 
   it('uses a custom baseUrl', async () => {

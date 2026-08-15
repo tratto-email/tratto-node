@@ -32,6 +32,24 @@ describe('WorkspaceResource', () => {
     expect(init.method).toBe('PATCH');
   });
 
+  it('update() sends keepTrattoBranding and the sender fields in the PATCH body', async () => {
+    vi.stubGlobal('fetch', mock({ data: { ...WS, keepTrattoBranding: true } }));
+    await tratto.workspace.update({
+      keepTrattoBranding: true,
+      defaultFromName: 'Acme',
+      defaultFromEmail: 'hello@acme.test',
+      customUnsubscribeUrl: null,
+    });
+    const [, init] = fetchCalls()[0] as [string, RequestInit];
+    const body = JSON.parse(String(init.body));
+    expect(body).toEqual({
+      keepTrattoBranding: true,
+      defaultFromName: 'Acme',
+      defaultFromEmail: 'hello@acme.test',
+      customUnsubscribeUrl: null,
+    });
+  });
+
   it('delete() sends DELETE /v1/workspace', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 204, json: vi.fn() }));
     await tratto.workspace.delete();

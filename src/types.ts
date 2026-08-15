@@ -435,6 +435,20 @@ export interface Workspace {
   timezone: string;
   locale: WorkspaceLocale;
   plan: WorkspacePlan;
+  /** Workspace default sender, used when a send does not specify one. */
+  defaultFromName: string | null;
+  defaultFromEmail: string | null;
+  /**
+   * Tenant-hosted unsubscribe/preference page. When set, {{unsubscribe_url}}
+   * resolves here instead of the Tratto-hosted page.
+   */
+  customUnsubscribeUrl: string | null;
+  /**
+   * Keep the "Sent using Tratto" branded footer on every HTML send even on a
+   * paid plan. On the free plan the branded footer is always applied
+   * regardless of this flag.
+   */
+  keepTrattoBranding: boolean;
   createdAt: string;
 }
 
@@ -460,6 +474,16 @@ export interface UpdateWorkspaceParams {
   slug?: string;
   timezone?: string;
   locale?: WorkspaceLocale;
+  defaultFromName?: string;
+  defaultFromEmail?: string;
+  /** Set to null to clear and fall back to the Tratto-hosted page. */
+  customUnsubscribeUrl?: string | null;
+  /**
+   * Opt in to keep the branded footer on paid plans. Accepted on any plan
+   * (no effect on free, where branding is mandatory) and never auto-reset
+   * by plan changes.
+   */
+  keepTrattoBranding?: boolean;
 }
 
 export interface UpdateWorkspacePreferencesParams {

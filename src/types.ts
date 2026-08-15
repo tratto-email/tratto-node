@@ -19,6 +19,12 @@ export interface SendEmailParams {
   to: string | string[];
   subject: string;
   html?: string;
+  /**
+   * emailmd markdown, rendered server-side into responsive email HTML
+   * (plus a text part). Mutually exclusive with `html` — the API rejects
+   * requests carrying both.
+   */
+  markdown?: string;
   text?: string;
   cc?: string[];
   bcc?: string[];
@@ -223,6 +229,8 @@ export interface SendCampaignParams {
 
 // ── Templates ─────────────────────────────────────────────────────────────────
 
+export type TemplateFormat = 'html' | 'emailmd';
+
 export type TemplateStatus = 'draft' | 'published';
 
 export interface TemplateSummary {
@@ -235,17 +243,31 @@ export interface TemplateSummary {
 }
 
 export interface Template extends TemplateSummary {
+  /** Always the pinned, ready-to-send HTML — for emailmd templates it is derived from `source`. */
   html: string;
+  /** 'html' for templates created before formats existed. Immutable after creation. */
+  format: TemplateFormat;
+  /** The markdown source of truth for emailmd templates. */
+  source?: string;
+  renderWarnings?: string[];
 }
 
 export interface CreateTemplateParams {
   name: string;
   html?: string;
+  /**
+   * emailmd markdown source. Creates a `format: 'emailmd'` template whose
+   * HTML is rendered server-side at save time. Mutually exclusive with
+   * `html` — sending both (or `html` on an emailmd template) is rejected.
+   */
+  markdown?: string;
 }
 
 export interface UpdateTemplateParams {
   name?: string;
   html?: string;
+  /** New markdown source for an emailmd template (re-rendered at save). */
+  markdown?: string;
   status?: TemplateStatus;
 }
 

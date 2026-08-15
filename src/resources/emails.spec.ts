@@ -28,6 +28,15 @@ describe('EmailsResource', () => {
       expect(result).toEqual({ id: 'em_1' });
     });
 
+    it('sends markdown verbatim in the body (mutually exclusive with html, enforced server-side)', async () => {
+      vi.stubGlobal('fetch', mock({ data: { id: 'email_1', livemode: true } }));
+      await tratto.emails.send({ from: 'a@b.c', to: 'success@simulator.amazonses.com', subject: 'md', markdown: '# Hi {{name}}' });
+      const [, init] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
+      const body = JSON.parse(String(init.body));
+      expect(body.markdown).toBe('# Hi {{name}}');
+      expect(body).not.toHaveProperty('html');
+    });
+
     it('includes Idempotency-Key header when provided', async () => {
       vi.stubGlobal('fetch', mock({ data: { id: 'em_1' } }));
       await tratto.emails.send({ from: 'a@b.com', to: 'c@d.com', subject: 'Hi', html: '<p>Hi</p>' }, 'key-123');

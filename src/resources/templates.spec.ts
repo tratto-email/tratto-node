@@ -32,6 +32,15 @@ describe('TemplatesResource', () => {
     expect((result as { id: string }).id).toBe('tpl_1');
   });
 
+  it('create() sends markdown for an emailmd template', async () => {
+    vi.stubGlobal('fetch', mock({ data: { id: 'tmpl_1', name: 'md', format: 'emailmd', html: '<html>', source: '# Hi', status: 'draft', version: 1, createdAt: '', updatedAt: '' } }));
+    const tpl = await tratto.templates.create({ name: 'md', markdown: '# Hi' });
+    const [, init] = fetchCalls()[0] as [string, RequestInit];
+    expect(JSON.parse(String(init.body))).toEqual({ name: 'md', markdown: '# Hi' });
+    expect(tpl.format).toBe('emailmd');
+    expect(tpl.source).toBe('# Hi');
+  });
+
   it('get() GETs /v1/templates/:id', async () => {
     vi.stubGlobal('fetch', mock({ data: TPL }));
     await tratto.templates.get('tpl_1');

@@ -34,6 +34,22 @@ const { id } = await tratto.emails.send({
 console.log('Sent email:', id);
 ```
 
+Or write the email in [emailmd](https://www.emailmd.dev/) markdown — the API
+renders it into responsive, email-safe HTML (plus a text part) server-side:
+
+```ts
+await tratto.emails.send({
+  from: 'Acme <hello@mail.acme.com>',
+  to: 'user@example.com',
+  subject: 'Welcome!',
+  markdown: '# Welcome, {{firstName}}\n\nGlad to have you on board.',
+});
+```
+
+`markdown` is mutually exclusive with `html`. Templates accept it too:
+`templates.create({ name, markdown })` creates a `format: 'emailmd'` template
+whose HTML is rendered and pinned at save time.
+
 ---
 
 ## Setup

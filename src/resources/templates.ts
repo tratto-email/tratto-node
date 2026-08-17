@@ -21,7 +21,13 @@ export class TemplatesResource extends BaseResource {
   }
 
   create(params: CreateTemplateParams): Promise<Template> {
-    return this.fetchData<Template>('POST', '/v1/templates', { body: params });
+    // The API's create schema requires format: 'emailmd' whenever markdown is
+    // present ("markdown requires format 'emailmd'.") — inferred here so the
+    // caller only chooses WHICH content field to pass. Caught by a docs
+    // fact-check against the live staging contract before 1.1.0 shipped.
+    const body =
+      params.markdown !== undefined ? { ...params, format: 'emailmd' as const } : params;
+    return this.fetchData<Template>('POST', '/v1/templates', { body });
   }
 
   get(id: string): Promise<Template> {

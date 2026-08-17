@@ -1,6 +1,6 @@
 {
   "name": "@tratto/email",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Tratto Node.js SDK \u2014 send transactional and marketing email",
   "author": "Tratto <hello@tratto.email>",
   "license": "MIT",

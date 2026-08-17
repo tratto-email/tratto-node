@@ -36,7 +36,10 @@ describe('TemplatesResource', () => {
     vi.stubGlobal('fetch', mock({ data: { id: 'tmpl_1', name: 'md', format: 'emailmd', html: '<html>', source: '# Hi', status: 'draft', version: 1, createdAt: '', updatedAt: '' } }));
     const tpl = await tratto.templates.create({ name: 'md', markdown: '# Hi' });
     const [, init] = fetchCalls()[0] as [string, RequestInit];
-    expect(JSON.parse(String(init.body))).toEqual({ name: 'md', markdown: '# Hi' });
+    // format must ride along or the live API 422s ("markdown requires
+    // format 'emailmd'.") — this exact assertion was wrong before: it pinned
+    // the body the SDK built instead of the body the API accepts.
+    expect(JSON.parse(String(init.body))).toEqual({ name: 'md', markdown: '# Hi', format: 'emailmd' });
     expect(tpl.format).toBe('emailmd');
     expect(tpl.source).toBe('# Hi');
   });

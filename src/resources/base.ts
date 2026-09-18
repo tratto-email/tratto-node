@@ -1,3 +1,4 @@
+import { version } from '../../package.json';
 import { TrattoError } from '../error';
 
 interface FetchOptions {
@@ -18,7 +19,7 @@ export abstract class BaseResource {
 
     const headers: Record<string, string> = {
       Authorization: `Bearer ${this.apiKey}`,
-      'User-Agent': '@tratto/email/0.1.0',
+      'User-Agent': `@tratto/email/${version}`,
       ...(contentType ? { 'Content-Type': contentType } : {}),
       ...options?.headers,
     };

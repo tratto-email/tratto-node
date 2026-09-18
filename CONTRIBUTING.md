@@ -43,12 +43,18 @@ npm ci
 
 ```
 src/
-  index.ts        # Public entry-point — re-exports everything
-  client.ts       # TrattoClient class and all resource objects
-  error.ts        # TrattoError class
-  types.ts        # All TypeScript type definitions
-examples/
-  node-script/    # Runnable example showing basic SDK usage
+  index.ts          # Public entry-point — re-exports client, error and types
+  client.ts         # TrattoClient: wires the resources below
+  error.ts          # TrattoError class
+  types.ts          # All TypeScript type definitions
+  resources/
+    base.ts         # BaseResource: fetch, auth header, User-Agent, query builder
+    analytics.ts  audiences.ts  campaigns.ts  contacts.ts  domains.ts
+    emails.ts     flows.ts      templates.ts  webhooks.ts  workspace.ts
+  **/*.spec.ts      # Vitest specs live next to the code they test
+examples/           # Standalone snippets (not built, not linted)
+  send-email.ts  contacts.ts  campaign.ts  analytics.ts  webhook.ts
+  express.ts  fastify.ts  nextjs.ts
 ```
 
 ## Development workflow
@@ -83,7 +89,9 @@ Watch mode for tests while developing:
 npm run test:watch
 ```
 
-CI runs these four checks in the order: `lint → typecheck → test → build`. The `build` job only runs once all three earlier jobs pass.
+CI runs the same four checks as separate jobs: `lint`, `typecheck` and `test`
+run in parallel; `build` starts only after `lint` and `typecheck` pass
+(`needs: [lint, typecheck]`) and uploads `dist/` as a workflow artifact.
 
 ## Submitting a pull request
 
@@ -121,9 +129,20 @@ test(client): cover 429 rate-limit response
 
 Releases are handled by maintainers. Publishing is automated via the `publish.yml` workflow, which is triggered when a new version tag (`v*`) is pushed to `main`.
 
-To prepare a release:
-1. Update `version` in `package.json`.
-2. Commit with `chore(release): v<version>`.
-3. Tag: `git tag v<version> && git push --tags`.
+The version lives in three places, all updated in the same PR:
+`package.json`, `package-lock.json` (the two root `version` fields) and
+`CHANGELOG.md`. The `User-Agent` header is read from `package.json` at build
+time — nothing to touch in `src/`.
 
-The workflow then runs `npm publish` automatically.
+To prepare a release (one PR against `main`):
+1. Bump `version` in `package.json`, then refresh the lockfile so it carries
+   the same version: `npm install --package-lock-only` (rewrites
+   `package-lock.json` only, `node_modules` is untouched).
+2. Add a `## <version>` section at the top of `CHANGELOG.md`.
+3. Commit with `chore(release): v<version>`, open the PR, merge it.
+4. Tag the merge commit: `git tag v<version> <sha> && git push origin v<version>`.
+
+The tag push triggers `publish.yml`, which runs `npm ci`, `npm run build` and
+`npm publish --provenance` through npm Trusted Publishing (OIDC). No GitHub
+release and no npm token are involved. This package uses **npm** (not pnpm)
+because that is the toolchain the publish workflow is registered with.

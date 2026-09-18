@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { version } from '../../package.json';
 import { BaseResource } from './base';
 import { TrattoError } from '../error';
 
@@ -43,7 +44,8 @@ describe('BaseResource', () => {
       expect(url).toBe(`${BASE_URL}/v1/test`);
       const headers = init.headers as Record<string, string>;
       expect(headers['Authorization']).toBe(`Bearer ${API_KEY}`);
-      expect(headers['User-Agent']).toBe('@tratto/email/0.1.0');
+      expect(headers['User-Agent']).toBe(`@tratto/email/${version}`);
+      expect(version).toMatch(/^\d+\.\d+\.\d+$/);
     });
 
     it('serialises body as JSON and sets Content-Type: application/json', async () => {

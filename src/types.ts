@@ -193,6 +193,14 @@ export interface Campaign {
   sentAt: string | null;
   stats: CampaignStats;
   createdAt: string;
+  /**
+   * The editable markdown of an emailmd campaign (its own copy — editing it
+   * never touches the template). Returned by `get()` only: `list()` omits
+   * `source` and `renderWarnings` to keep the payload small.
+   */
+  source?: string;
+  /** Markdown that could not be rendered. Returned by `get()` only, absent when empty. */
+  renderWarnings?: string[];
 }
 
 export interface CampaignStatsDetail {
@@ -365,7 +373,8 @@ export interface ListDomainsParams {
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
 
-export type AnalyticsPeriod = '7d' | '30d' | '90d';
+/** `'180d'` and `'1y'` read the long-term aggregate (live data only) and are rejected for test-mode keys. */
+export type AnalyticsPeriod = '7d' | '30d' | '90d' | '180d' | '1y';
 
 export interface AnalyticsSummary {
   period: AnalyticsPeriod;

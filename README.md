@@ -281,6 +281,16 @@ await tratto.templates.testSend(tpl.id, 'me@example.com', { name: 'Alice' });
 await tratto.templates.delete(tpl.id);
 ```
 
+Templates created from `markdown` come back with `format: 'emailmd'`, the
+markdown in `source`, the rendered HTML in `html`, and — when part of the
+markdown could not be rendered — a `renderWarnings: string[]` array on the
+template object. The field is absent when there is nothing to report:
+
+```ts
+const tpl = await tratto.templates.create({ name: 'Welcome', markdown: '# Hi {{name}}' });
+if (tpl.renderWarnings?.length) console.warn(tpl.renderWarnings);
+```
+
 ---
 
 ### Webhooks
@@ -342,7 +352,9 @@ console.log('Open rate:', summary.openRate);
 const points = await tratto.analytics.getTimeseries('7d');
 ```
 
-Supported periods: `'7d'` | `'30d'` | `'90d'`. Results are cached server-side for 1 hour.
+Supported periods: `'7d'` | `'30d'` | `'90d'` | `'180d'` | `'1y'` (default `'30d'`).
+`'180d'` and `'1y'` read the long-term aggregate, which holds live data only:
+they are rejected for test-mode keys. Results are cached server-side for 1 hour.
 
 ---
 
@@ -434,8 +446,6 @@ import type {
   Template,
   Webhook,
   Domain,
-  ApiKey,
-  ApiKeyCreated,
   AnalyticsSummary,
   TimeseriesPoint,
   Flow,

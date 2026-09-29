@@ -459,6 +459,32 @@ export type WorkspacePlan = 'free' | 'starter' | 'growth';
 export type WorkspaceMemberRole = 'owner' | 'admin' | 'member';
 export type WorkspaceLocale = 'it' | 'en';
 
+export type SendType = 'marketing' | 'automation' | 'transactional';
+
+/**
+ * Sender for one send type. `fromEmail` must be on a domain already verified
+ * for the workspace; `replyTo` is a response header, not the envelope sender,
+ * so it needs no verified domain.
+ */
+export interface Sender {
+  fromEmail: string;
+  fromName: string;
+  replyTo?: string | null;
+}
+
+/**
+ * Default sender per send type (API >= 0.5.7).
+ *
+ * `null` on a type means it is not configured and **inherits** the
+ * workspace-wide `defaultFromEmail`/`defaultFromName` — it is never a reason
+ * for a send to be refused.
+ *
+ * Which type applies where: `marketing` for campaigns and template test sends,
+ * `automation` for the emails a flow sends (resolved when the flow is
+ * activated), `transactional` for API sends that carry no `from` of their own.
+ */
+export type Senders = Record<SendType, Sender | null>;
+
 export interface Workspace {
   id: string;
   name: string;
@@ -469,6 +495,11 @@ export interface Workspace {
   /** Workspace default sender, used when a send does not specify one. */
   defaultFromName: string | null;
   defaultFromEmail: string | null;
+  /**
+   * Per-send-type senders. Optional: an API older than 0.5.7 does not send
+   * the field at all, so read it defensively rather than assuming three keys.
+   */
+  senders?: Partial<Senders>;
   /**
    * Tenant-hosted unsubscribe/preference page. When set, {{unsubscribe_url}}
    * resolves here instead of the Tratto-hosted page.
@@ -507,6 +538,13 @@ export interface UpdateWorkspaceParams {
   locale?: WorkspaceLocale;
   defaultFromName?: string;
   defaultFromEmail?: string;
+  /**
+   * Partial write: sending only `marketing` leaves the other two untouched,
+   * and `{ marketing: null }` puts that type back to inheriting the
+   * workspace-wide default. Both halves of a sender travel together — a
+   * `fromEmail` without a `fromName` is refused.
+   */
+  senders?: Partial<Record<SendType, Sender | null>>;
   /** Set to null to clear and fall back to the Tratto-hosted page. */
   customUnsubscribeUrl?: string | null;
   /**

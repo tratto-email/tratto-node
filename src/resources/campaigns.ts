@@ -41,6 +41,24 @@ export class CampaignsResource extends BaseResource {
     return this.fetchData<{ status: string }>('POST', `/v1/campaigns/${id}/send`, { body });
   }
 
+  /**
+   * Cancel a scheduled send: the campaign goes back to `draft` and its
+   * `scheduledAt` is cleared.
+   *
+   * Only a campaign still waiting for its date can be unscheduled. Anything
+   * else answers 409: a send already running, a campaign in any other status,
+   * or one that has already sent a test wave to part of its list and is
+   * waiting for the bounce rate before sending the rest. In those cases the
+   * emails already out cannot be recalled, so `pause()` is the way to stop it.
+   */
+  unschedule(id: string): Promise<{ id: string; status: 'draft'; scheduledAt: null }> {
+    return this.fetchData<{ id: string; status: 'draft'; scheduledAt: null }>(
+      'POST',
+      `/v1/campaigns/${id}/unschedule`,
+      { body: {} },
+    );
+  }
+
   pause(id: string): Promise<{ status: string }> {
     return this.fetchData<{ status: string }>('POST', `/v1/campaigns/${id}/pause`, { body: {} });
   }

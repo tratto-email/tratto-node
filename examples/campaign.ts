@@ -62,7 +62,21 @@ async function main() {
   const campaign = await tratto.campaigns.get(campaignId);
   console.log('Campaign status:', campaign.status, '/ paused reason:', campaign.pausedReason ?? 'none');
 
-  if (campaign.status === 'sending' || campaign.status === 'scheduled') {
+  if (campaign.status === 'scheduled') {
+    // A campaign still waiting for its date goes back to draft. The API
+    // answers 409 when it cannot: a campaign that already sent a test wave to
+    // part of the list is 'scheduled' too, and those emails cannot be
+    // recalled, so pausing is the only way to stop it.
+    try {
+      const draft = await tratto.campaigns.unschedule(campaignId);
+      console.log('Unscheduled:', draft.status, '/ scheduledAt:', draft.scheduledAt);
+    } catch (err) {
+      if (!(err instanceof TrattoError) || err.statusCode !== 409) throw err;
+      console.log('Cannot unschedule:', err.message);
+      const paused = await tratto.campaigns.pause(campaignId);
+      console.log('Paused instead:', paused.status);
+    }
+  } else if (campaign.status === 'sending') {
     // A campaign can also pause itself — check `pausedReason` for why:
     // quota_exceeded, schedule_missed or bounce_rate.
     const paused = await tratto.campaigns.pause(campaignId);

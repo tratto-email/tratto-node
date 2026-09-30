@@ -81,6 +81,27 @@ describe('CampaignsResource', () => {
     expect(body['scheduledAt']).toBe('2025-07-01T09:00:00.000Z');
   });
 
+  it('unschedule() POSTs to /v1/campaigns/:id/unschedule and unwraps the envelope', async () => {
+    vi.stubGlobal('fetch', mock({ data: { id: 'cmp_1', status: 'draft', scheduledAt: null } }));
+    const result = await tratto.campaigns.unschedule('cmp_1');
+    const [url, init] = fetchCalls()[0] as [string, RequestInit];
+    expect(url).toBe(`${BASE}/v1/campaigns/cmp_1/unschedule`);
+    expect(init.method).toBe('POST');
+    expect(result).toEqual({ id: 'cmp_1', status: 'draft', scheduledAt: null });
+  });
+
+  // The route has three different 409s (send already started, test wave in
+  // flight, any other status) and they share one code: whatever they say, the
+  // SDK must surface it as a TrattoError the caller can branch on.
+  it('unschedule() surfaces a 409 as a TrattoError carrying the API message', async () => {
+    vi.stubGlobal('fetch', mock({ error: { code: 'CONFLICT', message: 'This campaign has already sent a test wave of 500 emails and is waiting for its bounce rate before sending the rest. It can no longer be unscheduled.' } }, 409));
+    await expect(tratto.campaigns.unschedule('cmp_1')).rejects.toMatchObject({
+      statusCode: 409,
+      code: 'CONFLICT',
+      message: expect.stringContaining('test wave'),
+    });
+  });
+
   it('pause() POSTs to /v1/campaigns/:id/pause', async () => {
     vi.stubGlobal('fetch', mock({ data: { status: 'paused' } }));
     await tratto.campaigns.pause('cmp_1');

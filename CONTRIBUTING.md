@@ -10,6 +10,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - [Project structure](#project-structure)
 - [Development workflow](#development-workflow)
 - [Running the checks](#running-the-checks)
+- [Manual smoke test](#manual-smoke-test)
 - [Submitting a pull request](#submitting-a-pull-request)
 - [Commit style](#commit-style)
 - [Release process](#release-process)
@@ -52,9 +53,11 @@ src/
     analytics.ts  audiences.ts  campaigns.ts  contacts.ts  domains.ts
     emails.ts     flows.ts      templates.ts  webhooks.ts  workspace.ts
   **/*.spec.ts      # Vitest specs live next to the code they test
-examples/           # Standalone snippets (not built, not linted)
-  send-email.ts  contacts.ts  campaign.ts  analytics.ts  webhook.ts
-  express.ts  fastify.ts  nextjs.ts
+examples/           # Standalone snippets: type-checked and linted, never published
+  send-email.ts  contacts.ts  audiences.ts  campaign.ts  templates.ts
+  analytics.ts   webhook.ts   domains.ts    flows.ts     workspace.ts
+  express.ts     fastify.ts   nextjs.ts
+  smoke.ts       # the one runnable script, see "Manual smoke test" below
 ```
 
 ## Development workflow
@@ -88,6 +91,43 @@ Watch mode for tests while developing:
 ```bash
 npm run test:watch
 ```
+
+`lint` and `typecheck` cover `examples/` as well as `src/`. The examples are
+the only code in the repo written the way a customer writes it, so a renamed
+method or a changed signature fails a check instead of reaching npm. They are
+never part of the published package: `tsup` builds from `src/index.ts` and
+`files` in `package.json` ships `dist/` only.
+
+## Manual smoke test
+
+Every test in `src/` stubs `fetch`, so the whole suite stays green even if the
+API renames a field. `examples/smoke.ts` is the one thing that talks to a real
+server: it creates a contact, creates a template, sends an email, reads the
+status back, and cleans up after itself.
+
+It is **not** in CI, on purpose: the org has a hard 3000 minute/month budget on
+GitHub Actions. Run it by hand before publishing a release, the way the
+dashboard E2E suite is run.
+
+```bash
+cp examples/.env.example examples/.env   # then fill in every variable
+npx tsx --env-file=examples/.env examples/smoke.ts
+```
+
+`examples/.env` is gitignored. `.env.example` carries the variable names and
+no values: a key never enters the repo.
+
+- It refuses to start without a `tratto_test_…` key, and only ever sends to
+  `delivered@simulator.tratto.email`. No real inbox is touched and the
+  account's bounce rate does not move.
+- A missing variable stops the run with the name of the variable. There is no
+  silent skip.
+- It does not touch flows: those are the only v1 resource with no granular
+  scope, so they would need a key with the `*` permission. They stay in the
+  compiled examples.
+- Cleanup runs even when a step fails. The template is deleted; the contact is
+  unsubscribed and reused by the next run, because v1 has no contact-delete
+  route; the test email expires on its own after 7 days.
 
 CI runs the same four checks as separate jobs: `lint`, `typecheck` and `test`
 run in parallel; `build` starts only after `lint` and `typecheck` pass

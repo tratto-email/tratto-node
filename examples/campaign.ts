@@ -55,7 +55,21 @@ async function main() {
   const { status } = await tratto.campaigns.send(campaignId, { scheduledAt: nextMonday });
   console.log('Campaign status:', status, '(scheduled for', nextMonday.toISOString(), ')');
 
-  // ── 6. Print delivery stats ───────────────────────────────────────────────
+  // ── 6. Find it again, and stop it if it is still going ───────────────────
+  const { data: scheduled } = await tratto.campaigns.list({ status: 'scheduled', limit: 10 });
+  console.log(`\n${scheduled.length} scheduled campaigns`);
+
+  const campaign = await tratto.campaigns.get(campaignId);
+  console.log('Campaign status:', campaign.status, '/ paused reason:', campaign.pausedReason ?? 'none');
+
+  if (campaign.status === 'sending' || campaign.status === 'scheduled') {
+    // A campaign can also pause itself — check `pausedReason` for why:
+    // quota_exceeded, schedule_missed or bounce_rate.
+    const paused = await tratto.campaigns.pause(campaignId);
+    console.log('Paused:', paused.status);
+  }
+
+  // ── 7. Print delivery stats ───────────────────────────────────────────────
   const stats = await tratto.campaigns.getStats(campaignId);
   console.log('\nDelivery stats:');
   console.log('  Total:        ', stats.stats.total);

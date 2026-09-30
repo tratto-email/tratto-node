@@ -50,7 +50,11 @@ async function main() {
   console.log('  Status:', detail.status);
   console.log('  Events:', detail.events.length);
 
-  // ── 5. List recent delivered emails ──────────────────────────────────────
+  // ── 5. Follow the delivery timeline ──────────────────────────────────────
+  const events = await tratto.emails.listEvents(id);
+  for (const e of events) console.log(`  ${e.occurredAt}  ${e.type}`);
+
+  // ── 6. List recent delivered emails ──────────────────────────────────────
   const { data, pagination } = await tratto.emails.list({
     status: 'delivered',
     limit: 5,

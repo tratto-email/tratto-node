@@ -40,6 +40,14 @@ describe('CampaignsResource', () => {
     expect((result as { id: string }).id).toBe('cmp_1');
   });
 
+  // Reading `pausedReason` off the returned Campaign without a cast is the
+  // point: if the field leaves the type, `npm run typecheck` fails here.
+  it('get() exposes pausedReason on a self-paused campaign', async () => {
+    vi.stubGlobal('fetch', mock({ data: { ...CAMPAIGN, status: 'paused', pausedReason: 'bounce_rate' } }));
+    const campaign = await tratto.campaigns.get('cmp_1');
+    expect(campaign.pausedReason).toBe('bounce_rate');
+  });
+
   it('getStats() GETs /v1/campaigns/:id/stats', async () => {
     vi.stubGlobal('fetch', mock({ data: { campaignId: 'cmp_1', status: 'completed', stats: {}, rates: {} } }));
     await tratto.campaigns.getStats('cmp_1');

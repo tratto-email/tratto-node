@@ -252,6 +252,13 @@ await tratto.campaigns.send(id, { scheduledAt: new Date('2025-07-01T09:00:00Z') 
 const stats = await tratto.campaigns.getStats(id);
 console.log(stats.rates.openRate);
 
+// Cancel a scheduled send: back to draft, scheduledAt cleared
+await tratto.campaigns.unschedule(id);
+
+// 409 if it cannot: the send already started, the campaign is in another
+// status, or it already sent a test wave to part of the list and is waiting
+// for the bounce rate. Those emails cannot be recalled, so pause it instead.
+
 // Pause
 await tratto.campaigns.pause(id);
 
@@ -474,7 +481,7 @@ See the [`examples/`](examples/) folder:
 | [`send-email.ts`](examples/send-email.ts) | Send transactional emails (HTML, template, with idempotency), read the timeline |
 | [`contacts.ts`](examples/contacts.ts) | Contact management and CSV bulk import |
 | [`audiences.ts`](examples/audiences.ts) | Rule-based audiences, adding contacts to one |
-| [`campaign.ts`](examples/campaign.ts) | Create, configure, send and pause a marketing campaign |
+| [`campaign.ts`](examples/campaign.ts) | Create, configure, send, unschedule and pause a marketing campaign |
 | [`templates.ts`](examples/templates.ts) | Template life cycle: create, edit, versions, test send, delete |
 | [`analytics.ts`](examples/analytics.ts) | Fetch delivery metrics and daily timeseries |
 | [`webhook.ts`](examples/webhook.ts) | Register a webhook and inspect delivery history |

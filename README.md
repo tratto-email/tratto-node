@@ -471,20 +471,32 @@ See the [`examples/`](examples/) folder:
 
 | File | Description |
 |---|---|
-| [`send-email.ts`](examples/send-email.ts) | Send transactional emails (HTML, template, with idempotency) |
+| [`send-email.ts`](examples/send-email.ts) | Send transactional emails (HTML, template, with idempotency), read the timeline |
 | [`contacts.ts`](examples/contacts.ts) | Contact management and CSV bulk import |
-| [`campaign.ts`](examples/campaign.ts) | Create, configure, and send a marketing campaign |
+| [`audiences.ts`](examples/audiences.ts) | Rule-based audiences, adding contacts to one |
+| [`campaign.ts`](examples/campaign.ts) | Create, configure, send and pause a marketing campaign |
+| [`templates.ts`](examples/templates.ts) | Template life cycle: create, edit, versions, test send, delete |
 | [`analytics.ts`](examples/analytics.ts) | Fetch delivery metrics and daily timeseries |
 | [`webhook.ts`](examples/webhook.ts) | Register a webhook and inspect delivery history |
+| [`domains.ts`](examples/domains.ts) | Add a sending domain, print its DNS records, verify it |
+| [`flows.ts`](examples/flows.ts) | Automation flows (needs an API key with the `*` permission) |
+| [`workspace.ts`](examples/workspace.ts) | Workspace settings, per-send-type senders, members |
 | [`nextjs.ts`](examples/nextjs.ts) | Next.js App Router route handler sending a welcome email |
 | [`express.ts`](examples/express.ts) | Express route sending a password-reset email |
 | [`fastify.ts`](examples/fastify.ts) | Fastify route sending an order-confirmation email via template |
+| [`smoke.ts`](examples/smoke.ts) | Runnable round-trip against a real API in test mode ([how to run](CONTRIBUTING.md#manual-smoke-test)) |
+
+Every example is type-checked and linted with the rest of the repo, so a
+renamed method breaks the build instead of a user's integration.
 
 Run any example with [tsx](https://github.com/privatenumber/tsx):
 
 ```bash
 TRATTO_API_KEY=tratto_live_... npx tsx examples/send-email.ts
 ```
+
+The examples are written the way you would use the SDK, against real
+resources: read them before you run them.
 
 ---
 

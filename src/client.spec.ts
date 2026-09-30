@@ -3,6 +3,37 @@ import { Tratto, TrattoError } from './client';
 
 const API_KEY = 'tratto_test_key';
 
+
+describe('workspace senders (tipi, #28)', () => {
+  it('manda una scrittura parziale, e il null che rimette in eredita', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => ({ data: { id: 'ws_1' } }),
+      text: async () => '{"data":{"id":"ws_1"}}',
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const tratto = new Tratto(API_KEY);
+
+    // Un tipo solo: gli altri due non si toccano.
+    await tratto.workspace.update({
+      senders: { marketing: { fromEmail: 'news@acme.test', fromName: 'Acme' } },
+    });
+    // null: quel tipo torna a ereditare il mittente generale del workspace.
+    await tratto.workspace.update({ senders: { marketing: null } });
+
+    const bodies = fetchMock.mock.calls.map((c) => JSON.parse(String((c[1] as RequestInit).body)));
+    expect(bodies[0]).toEqual({
+      senders: { marketing: { fromEmail: 'news@acme.test', fromName: 'Acme' } },
+    });
+    expect(bodies[1]).toEqual({ senders: { marketing: null } });
+
+    vi.unstubAllGlobals();
+  });
+});
+
 describe('Tratto', () => {
   afterEach(() => vi.unstubAllGlobals());
 

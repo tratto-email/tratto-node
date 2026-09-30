@@ -170,6 +170,16 @@ export interface AddContactsToAudienceResult {
 
 export type CampaignStatus = 'draft' | 'sending' | 'scheduled' | 'paused' | 'completed';
 
+/**
+ * Why a paused campaign is paused. `null` for a manual pause, or for a
+ * campaign that was never paused.
+ *
+ * - `quota_exceeded` — the dispatcher hit the monthly plan cap mid-send.
+ * - `schedule_missed` — the scheduled send window passed without dispatch.
+ * - `bounce_rate` — too many permanent bounces, the campaign stopped itself.
+ */
+export type CampaignPausedReason = 'quota_exceeded' | 'schedule_missed' | 'bounce_rate';
+
 export interface CampaignStats {
   total: number;
   sent: number;
@@ -183,6 +193,8 @@ export interface Campaign {
   id: string;
   name: string;
   status: CampaignStatus;
+  /** Set whenever `status` is `paused`, `null` otherwise. */
+  pausedReason: CampaignPausedReason | null;
   templateId: string;
   audienceId: string;
   fromName: string;

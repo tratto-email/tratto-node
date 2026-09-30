@@ -27,6 +27,7 @@ export type {
   AddContactsToAudienceResult,
   // Campaigns
   CampaignStatus,
+  CampaignPausedReason,
   CampaignStats,
   Campaign,
   CampaignStatsDetail,

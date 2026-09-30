@@ -255,6 +255,14 @@ console.log(stats.rates.openRate);
 // Pause
 await tratto.campaigns.pause(id);
 
+// Why a campaign is paused: 'quota_exceeded', 'schedule_missed',
+// 'bounce_rate' (it stopped itself on too many permanent bounces),
+// or null when it was paused by hand.
+const campaign = await tratto.campaigns.get(id);
+if (campaign.pausedReason === 'bounce_rate') {
+  console.log('Stopped: too many bounces. Clean the list before resuming.');
+}
+
 // Test send
 const { emailId } = await tratto.campaigns.testSend(id, 'me@example.com');
 ```
@@ -442,6 +450,7 @@ import type {
   Contact,
   Audience,
   Campaign,
+  CampaignPausedReason,
   CampaignStatsDetail,
   Template,
   Webhook,

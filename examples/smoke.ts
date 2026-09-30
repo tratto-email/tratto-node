@@ -30,7 +30,7 @@ function requireEnv(name: string): string {
 }
 
 const apiKey = requireEnv('TRATTO_API_KEY');
-const from = requireEnv('TRATTO_SMOKE_FROM');
+const from = requireEnv('TRATTO_FROM_EMAIL');
 const baseUrl = process.env['TRATTO_BASE_URL'] || 'https://api-staging.tratto.email';
 
 if (!apiKey.startsWith('tratto_test_')) {

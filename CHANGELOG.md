@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.2.0
+
+- `campaigns.unschedule(id)` cancels a pending schedule and puts the campaign
+  back in `draft`. The route has answered three different 409s since the API
+  added the bounce-probe wave: one of them means part of the list has already
+  received the email and cannot be un-sent, so read `message` before retrying.
+  They share the same `code`, which is tracked in `tratto-email/tratto-api#605`.
+- `Campaign` gains `pausedReason` (`CampaignPausedReason | null`): how a client
+  finds out why a campaign stopped on its own. `'bounce_rate'` is new — the
+  campaign's own list produced too many permanent bounces and the send was
+  halted. The field is always present on `GET /v1/campaigns` and
+  `GET /v1/campaigns/{id}`; it is **not** returned by the stats route, so
+  `CampaignStatsDetail` does not carry it.
+- `Workspace` gains the per-send-type senders (`marketing`, `automation`,
+  `transactional`): each is either `null`, meaning it inherits the
+  workspace-wide default, or carries its own `fromEmail`/`fromName`/`replyTo`.
+- The examples in `examples/` are now type-checked and linted with the rest of
+  the package, so one that calls a renamed method breaks the build instead of
+  rotting unnoticed. They cover all 55 public methods. `examples/smoke.ts` runs
+  a real round trip against `api-staging` from an `.env`: it refuses a live key,
+  sends to a simulator address, and cleans up after itself.
+
 ## 1.1.1
 
 - The `User-Agent` header now reports the real package version

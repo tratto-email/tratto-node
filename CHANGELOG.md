@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.0
 
 - `workspace.delete()` is deprecated. The API refuses `DELETE /v1/workspace`
   for every API key (403), so the method could never succeed: a workspace is

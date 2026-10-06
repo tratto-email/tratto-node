@@ -46,15 +46,17 @@ async function main() {
   });
   console.log('Preferences:', JSON.stringify(prefs.emailNotifications));
 
-  // ── 4. Invite a teammate, promote them, remove them ──────────────────────
-  const member = await tratto.workspace.inviteMember({ email: 'bob@acme.com', role: 'member' });
-  console.log(`\nInvited ${member.email} as ${member.role}`);
-
-  const promoted = await tratto.workspace.updateMember(member.userId, { role: 'admin' });
-  console.log(`${promoted.email} is now ${promoted.role}`);
-
-  await tratto.workspace.removeMember(member.userId);
-  console.log('Member removed');
+  // ── 4. Members ───────────────────────────────────────────────────────────
+  // Members are invited and removed from the dashboard, by the workspace
+  // owner. The API refuses `POST /v1/workspace/members/invite` and
+  // `DELETE /v1/workspace/members/:userId` for every API key, so
+  // `tratto.workspace.inviteMember()` and `tratto.workspace.removeMember()`
+  // are deprecated: they cannot succeed.
+  //
+  // Changing a member's role still works. The userId is read in the
+  // dashboard, where the members are listed:
+  // const promoted = await tratto.workspace.updateMember('<userId>', { role: 'admin' });
+  // console.log(`${promoted.email} is now ${promoted.role}`);
 
   // ── 5. Deleting the workspace ────────────────────────────────────────────
   // A workspace is deleted from the dashboard, by its owner. The API refuses

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- `workspace.inviteMember()` and `workspace.removeMember()` are deprecated. The
+  API refuses `POST /v1/workspace/members/invite` and
+  `DELETE /v1/workspace/members/:userId` for every API key (403), so the
+  methods could never succeed: members are invited and removed from the
+  dashboard, by the workspace owner. They will be removed in the next major
+  version. `workspace.updateMember()` is unchanged.
+
 ## 1.3.0
 
 - `workspace.delete()` is deprecated. The API refuses `DELETE /v1/workspace`

@@ -57,9 +57,9 @@ async function main() {
   console.log('Member removed');
 
   // ── 5. Deleting the workspace ────────────────────────────────────────────
-  // `tratto.workspace.delete()` wipes the tenant: contacts, templates, email
-  // history, everything. Left commented on purpose — there is no undo.
-  // await tratto.workspace.delete();
+  // A workspace is deleted from the dashboard, by its owner. The API refuses
+  // `DELETE /v1/workspace` for every API key, so `tratto.workspace.delete()`
+  // is deprecated: it cannot succeed.
 }
 
 main().catch(err => {

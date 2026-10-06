@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- `workspace.delete()` is deprecated. The API refuses `DELETE /v1/workspace`
+  for every API key (403), so the method could never succeed: a workspace is
+  deleted from the dashboard, by its owner. It will be removed in the next
+  major version.
+
 ## 1.2.0
 
 - `campaigns.unschedule(id)` cancels a pending schedule and puts the campaign

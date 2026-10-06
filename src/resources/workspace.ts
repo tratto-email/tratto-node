@@ -18,6 +18,11 @@ export class WorkspaceResource extends BaseResource {
     return this.fetchData<Workspace>('PATCH', '/v1/workspace', { body: params });
   }
 
+  /**
+   * @deprecated The API refuses this call for every API key (403): a workspace
+   * is deleted from the dashboard, by its owner. This method cannot succeed
+   * and will be removed in the next major version.
+   */
   delete(): Promise<void> {
     return this.fetch<void>('DELETE', '/v1/workspace');
   }

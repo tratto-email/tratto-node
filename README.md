@@ -415,11 +415,13 @@ await tratto.workspace.updatePreferences({
   emailNotifications: { weeklyReport: true },
 });
 
-// Team management
-await tratto.workspace.inviteMember({ email: 'dev@acme.com', role: 'admin' });
+// Change a member's role (the userId is shown in the dashboard)
 await tratto.workspace.updateMember('usr_abc123', { role: 'member' });
-await tratto.workspace.removeMember('usr_abc123');
 ```
+
+Members are invited and removed from the dashboard by the workspace owner;
+the API refuses these calls for API keys, so `inviteMember()` and
+`removeMember()` are deprecated.
 
 ---
 

@@ -33,6 +33,11 @@ export class WorkspaceResource extends BaseResource {
     });
   }
 
+  /**
+   * @deprecated The API refuses this call for every API key (403): members are
+   * invited from the dashboard, by the workspace owner. This method cannot
+   * succeed and will be removed in the next major version.
+   */
   inviteMember(params: InviteMemberParams): Promise<WorkspaceMember> {
     return this.fetchData<WorkspaceMember>('POST', '/v1/workspace/members/invite', {
       body: params,
@@ -45,6 +50,11 @@ export class WorkspaceResource extends BaseResource {
     });
   }
 
+  /**
+   * @deprecated The API refuses this call for every API key (403): members are
+   * removed from the dashboard, by the workspace owner. This method cannot
+   * succeed and will be removed in the next major version.
+   */
   removeMember(userId: string): Promise<void> {
     return this.fetch<void>('DELETE', `/v1/workspace/members/${userId}`);
   }

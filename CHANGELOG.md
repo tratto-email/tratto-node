@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.3.1
+
 - README and npm metadata: the intro says what Tratto is (an EU-hosted email
   API), that it is in private beta and how to request an invite; `keywords`
   added and `description` updated so the package shows up in npm search. No

@@ -1,9 +1,22 @@
 # @tratto/email
 
-Official Node.js SDK for the [Tratto](https://tratto.email) email platform.
+Official Node.js SDK for [Tratto](https://tratto.email/en?utm_source=npm), an
+email API hosted in the EU: transactional email, campaigns and automation flows
+from one REST API. Data is stored in EU regions (Firestore `eur3`, BigQuery
+`europe-west1`) and email is sent through AWS SES `eu-west-1`; every provider is
+listed on the [sub-processors page](https://tratto.email/en/sub-processors?utm_source=npm).
 
 [![npm](https://img.shields.io/npm/v/@tratto/email)](https://www.npmjs.com/package/@tratto/email)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> **Private beta.** Tratto is invite-only for now: invites go out in small
+> batches, and invited accounts start on the Free plan. To get an API key,
+> [request an invite](https://tratto.email/en?utm_source=npm#waitlist).
+
+**Links:** [Documentation](https://docs.tratto.email/en/docs/sdk-nodejs) ·
+[API reference](https://docs.tratto.email/en/docs/api-reference-intro) ·
+[Python SDK](https://pypi.org/project/tratto-email/) ·
+[Changelog](./CHANGELOG.md)
 
 ## Installation
 
@@ -62,7 +75,7 @@ const tratto = new Tratto(apiKey, options?);
 
 | Parameter | Type | Description |
 |---|---|---|
-| `apiKey` | `string` | Required. Obtain one at `https://app.tratto.email/settings/api-keys`. Supports both `tratto_live_…` and `tratto_test_…` keys. |
+| `apiKey` | `string` | Required. Create one at `https://app.tratto.email/settings/api-keys` (needs an invited account during the private beta). Supports both `tratto_live_…` and `tratto_test_…` keys. |
 | `options.baseUrl` | `string` | Optional. Defaults to `https://api.tratto.email`. |
 
 ---

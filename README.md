@@ -199,6 +199,11 @@ const { id } = await tratto.contacts.create({
 
 ```ts
 const { data } = await tratto.contacts.list({ status: 'subscribed', limit: 50 });
+
+// Find a contact by address: `q` is a case-insensitive prefix search,
+// so compare `email` on the results.
+const { data: matches } = await tratto.contacts.list({ q: 'ann@example.com' });
+const ann = matches.find((c) => c.email === 'ann@example.com');
 ```
 
 #### `contacts.update(id, params)`

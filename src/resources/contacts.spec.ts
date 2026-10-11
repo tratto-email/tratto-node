@@ -32,6 +32,15 @@ describe('ContactsResource', () => {
     expect(result.data).toEqual([]);
   });
 
+  it('list() passes q for an email prefix search', async () => {
+    const page = { data: [], pagination: { hasMore: false, nextCursor: null } };
+    vi.stubGlobal('fetch', mock(page));
+    await tratto.contacts.list({ q: 'ann+test@example.com', limit: 10 });
+    const [url] = fetchCalls()[0] as [string];
+    expect(new URL(url).searchParams.get('q')).toBe('ann+test@example.com');
+    expect(new URL(url).searchParams.get('limit')).toBe('10');
+  });
+
   it('update() PATCHes /v1/contacts/:id', async () => {
     vi.stubGlobal('fetch', mock({ data: { id: 'con_1' } }));
     const result = await tratto.contacts.update('con_1', { status: 'unsubscribed' });

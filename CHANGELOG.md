@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- `contacts.list()` takes `q`, the email prefix search `GET /v1/contacts` already
+  supported: until now the SDK dropped it, so a contact could not be found from
+  its address. It is a prefix, not an exact match: compare `email` on the
+  results when you need one address. It combines with `status` only; the API
+  answers 400 when it is sent with `audienceId` or `tag`.
+
 ## 1.3.1
 
 - README and npm metadata: the intro says what Tratto is (an EU-hosted email

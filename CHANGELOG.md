@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.4.0
+
 - `contacts.list()` takes `q`, the email prefix search `GET /v1/contacts` already
   supported: until now the SDK dropped it, so a contact could not be found from
   its address. It is a prefix, not an exact match: compare `email` on the

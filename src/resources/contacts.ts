@@ -15,6 +15,7 @@ export class ContactsResource extends BaseResource {
 
   list(params?: ListContactsParams): Promise<PaginatedResponse<Contact>> {
     const qs = this.buildQuery({
+      q: params?.q,
       status: params?.status,
       audienceId: params?.audienceId,
       tag: params?.tag,

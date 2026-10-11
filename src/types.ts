@@ -108,6 +108,14 @@ export interface UpdateContactParams {
 }
 
 export interface ListContactsParams {
+  /**
+   * Email prefix search, case-insensitive. A prefix, not an exact match:
+   * `q: 'ann@example.com'` also returns `ann@example.com.au`, so compare
+   * `email` on the results when you are looking for one address. Combines
+   * with `status` only: the API answers 400 when it is sent together with
+   * `audienceId` or `tag`.
+   */
+  q?: string;
   status?: ContactStatus;
   audienceId?: string;
   tag?: string;

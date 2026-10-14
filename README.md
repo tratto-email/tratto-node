@@ -104,8 +104,8 @@ The recipient address picks the outcome (any other address simulates a normal de
 | Recipient | Outcome |
 |---|---|
 | `delivered@simulator.tratto.email` | `delivered` event |
-| `bounced@simulator.tratto.email` | permanent bounce → email ends `failed` |
-| `soft-bounced@simulator.tratto.email` | transient bounce |
+| `bounced@simulator.tratto.email` | permanent bounce → email ends `bounced` |
+| `soft-bounced@simulator.tratto.email` | transient bounce → email also ends `bounced` |
 | `complained@simulator.tratto.email` | spam complaint event |
 
 ### What to expect

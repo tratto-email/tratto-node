@@ -15,7 +15,16 @@ export interface PaginatedResponse<T> {
 // ── Emails ────────────────────────────────────────────────────────────────────
 
 export interface SendEmailParams {
-  from: string;
+  /**
+   * Optional. When omitted, the API picks the sender from the workspace:
+   * first `senders.transactional` (its `fromEmail`/`fromName`, and its
+   * `replyTo` when the request carries none), then the workspace-wide
+   * `defaultFromEmail` (with `defaultFromName` when set). If neither is
+   * configured the API answers 422 `VALIDATION_ERROR`. With a live key the
+   * resolved sender's domain must be verified, or the API answers 403.
+   * Requires API >= 0.18.0.
+   */
+  from?: string;
   to: string | string[];
   subject: string;
   html?: string;
@@ -501,7 +510,9 @@ export interface Sender {
  *
  * Which type applies where: `marketing` for campaigns and template test sends,
  * `automation` for the emails a flow sends (resolved when the flow is
- * activated), `transactional` for API sends that carry no `from` of their own.
+ * activated), `transactional` for `emails.send()` calls that omit `from`
+ * (its `replyTo` applies only when the call carries no `replyTo` either).
+ * A call that passes `from` does not use it.
  */
 export type Senders = Record<SendType, Sender | null>;
 

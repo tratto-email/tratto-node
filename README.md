@@ -155,6 +155,19 @@ const { id } = await tratto.emails.send(
 );
 ```
 
+You can omit `from` (requires `@tratto/email` 1.5.0 or later). The API then
+uses the workspace's transactional sender, or the workspace default sender if
+no transactional one is set, and answers 422 if neither is configured. See
+[Senders](https://docs.tratto.email/en/docs/senders#transactional).
+
+```ts
+const { id } = await tratto.emails.send({
+  to: 'user@example.com',
+  subject: 'Welcome!',
+  html: '<p>Hello world</p>',
+});
+```
+
 #### `emails.list(params?)`
 
 ```ts

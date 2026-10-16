@@ -37,6 +37,26 @@ describe('EmailsResource', () => {
       expect(body).not.toHaveProperty('html');
     });
 
+    it('sends no from key at all when from is omitted (the API then resolves the workspace sender)', async () => {
+      vi.stubGlobal('fetch', mock({ data: { id: 'em_1' } }));
+      // Compiles without `from`: the typecheck job fails if it becomes required again.
+      await tratto.emails.send({ to: 'c@d.com', subject: 'Hi', html: '<p>Hi</p>' });
+      await tratto.emails.send({ from: undefined, to: 'c@d.com', subject: 'Hi', html: '<p>Hi</p>' });
+
+      for (const [, init] of (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls as [string, RequestInit][]) {
+        const body = JSON.parse(String(init.body));
+        expect(body).not.toHaveProperty('from');
+        expect(body).toEqual({ to: 'c@d.com', subject: 'Hi', html: '<p>Hi</p>' });
+      }
+    });
+
+    it('sends from verbatim when passed', async () => {
+      vi.stubGlobal('fetch', mock({ data: { id: 'em_1' } }));
+      await tratto.emails.send({ from: 'Acme <a@b.com>', to: 'c@d.com', subject: 'Hi', html: '<p>Hi</p>' });
+      const [, init] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
+      expect(JSON.parse(String(init.body)).from).toBe('Acme <a@b.com>');
+    });
+
     it('includes Idempotency-Key header when provided', async () => {
       vi.stubGlobal('fetch', mock({ data: { id: 'em_1' } }));
       await tratto.emails.send({ from: 'a@b.com', to: 'c@d.com', subject: 'Hi', html: '<p>Hi</p>' }, 'key-123');

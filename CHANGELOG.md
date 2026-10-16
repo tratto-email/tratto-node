@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 1.5.0
+
+- `from` is optional in `emails.send()` (`SendEmailParams`). When it is
+  omitted the key is not sent, and the API uses the workspace's
+  `senders.transactional`, then the workspace default sender
+  (`defaultFromEmail`), and answers 422 `VALIDATION_ERROR` if neither is
+  configured. With a live key the resolved sender's domain must be verified
+  (403 otherwise). Passing `from` works exactly as before.
+- The `Senders` docstring now says precisely when `transactional` applies:
+  to `emails.send()` calls without `from`; its `replyTo` only when the call
+  carries none.
+
 ## 1.4.0
 
 - `contacts.list()` takes `q`, the email prefix search `GET /v1/contacts` already

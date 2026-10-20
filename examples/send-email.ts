@@ -1,5 +1,5 @@
 /**
- * Example: Send transactional emails — plain HTML, template-based, with idempotency.
+ * Example: Send transactional emails — plain HTML, template-based, with idempotency, in a batch.
  *
  * Run:
  *   TRATTO_API_KEY=tratto_live_... npx tsx examples/send-email.ts
@@ -44,17 +44,31 @@ async function main() {
   );
   console.log('Idempotent email sent:', idempotent.id);
 
-  // ── 4. Inspect full email detail ─────────────────────────────────────────
+  // ── 4. Send a batch (up to 100 emails, one request) ──────────────────────
+  const batch = await tratto.emails.sendBatch(
+    [
+      { to: 'carol@example.com', subject: 'Your order shipped', html: '<p>On its way.</p>' },
+      { to: 'dave@example.com', subject: 'Your order shipped', html: '<p>On its way.</p>' },
+    ],
+    `orders-${Date.now()}`,
+  );
+  console.log(`Batch ${batch.batchId}: ${batch.accepted} accepted, ${batch.failed} failed`);
+  for (const e of batch.emails) {
+    // Failed emails have no id: retry them in a new batch with a new key.
+    if (e.status === 'failed') console.log(`  failed ${e.to.join(', ')}: ${e.error.code}`);
+  }
+
+  // ── 5. Inspect full email detail ─────────────────────────────────────────
   const detail = await tratto.emails.get(id);
   console.log('\nEmail detail:');
   console.log('  Status:', detail.status);
   console.log('  Events:', detail.events.length);
 
-  // ── 5. Follow the delivery timeline ──────────────────────────────────────
+  // ── 6. Follow the delivery timeline ──────────────────────────────────────
   const events = await tratto.emails.listEvents(id);
   for (const e of events) console.log(`  ${e.occurredAt}  ${e.type}`);
 
-  // ── 6. List recent delivered emails ──────────────────────────────────────
+  // ── 7. List recent delivered emails ──────────────────────────────────────
   const { data, pagination } = await tratto.emails.list({
     status: 'delivered',
     limit: 5,

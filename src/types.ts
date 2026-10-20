@@ -45,6 +45,30 @@ export interface SendEmailParams {
   headers?: Record<string, string>;
 }
 
+/**
+ * One email of `emails.sendBatch()`: the fields of `SendEmailParams` except
+ * `scheduledAt` (a batch is sent immediately) and `attachments`, which the
+ * batch route rejects with 422. Type-level only: the API is the one that checks.
+ */
+export type BatchEmailParams = Omit<SendEmailParams, 'scheduledAt'> & {
+  scheduledAt?: never;
+  attachments?: never;
+};
+
+/** Outcome of one email in a batch, in the same position as in the request. */
+export type BatchEmailResult =
+  | { status: 'queued'; id: string; to: string[] }
+  | { status: 'failed'; to: string[]; error: { code: string; message: string } };
+
+export interface SendBatchResponse {
+  batchId: string;
+  livemode: boolean;
+  accepted: number;
+  /** Always present. A 202 with `failed > 0` resolves: check `emails[i].status`. */
+  failed: number;
+  emails: BatchEmailResult[];
+}
+
 export interface ListEmailsParams {
   after?: string;
   limit?: number;

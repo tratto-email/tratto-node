@@ -7,6 +7,9 @@ export type {
   PaginatedResponse,
   // Emails
   SendEmailParams,
+  BatchEmailParams,
+  BatchEmailResult,
+  SendBatchResponse,
   ListEmailsParams,
   EmailSummary,
   EmailEvent,

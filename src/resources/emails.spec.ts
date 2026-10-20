@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { Tratto } from '../client';
+import { Tratto, TrattoError } from '../client';
+import type { BatchEmailParams } from '../types';
 
 const API_KEY = 'tratto_test_key';
 const BASE = 'https://api.tratto.email';
@@ -71,6 +72,81 @@ describe('EmailsResource', () => {
 
       const [, init] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
       expect((init.headers as Record<string, string>)['Idempotency-Key']).toBeUndefined();
+    });
+  });
+
+  describe('sendBatch()', () => {
+    const calls = () => (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls as [string, RequestInit][];
+    const emails: BatchEmailParams[] = [
+      { to: 'a@x.it', subject: 'A', html: '<p>A</p>' },
+      { to: 'b@x.it', subject: 'B', html: '<p>B</p>' },
+    ];
+    const queued = { batchId: 'batch_1', livemode: true, accepted: 2, failed: 0, emails: [
+      { id: 'email_1', status: 'queued', to: ['a@x.it'] },
+      { id: 'email_2', status: 'queued', to: ['b@x.it'] },
+    ] };
+
+    it('POSTs { emails } to /v1/emails/batch with the Idempotency-Key header', async () => {
+      vi.stubGlobal('fetch', mock({ data: queued }, 202));
+      const result = await tratto.emails.sendBatch(emails, 'key-1');
+
+      const [url, init] = calls()[0]!;
+      expect(url).toBe(`${BASE}/v1/emails/batch`);
+      expect(init.method).toBe('POST');
+      expect(JSON.parse(String(init.body))).toEqual({ emails });
+      expect((init.headers as Record<string, string>)['Idempotency-Key']).toBe('key-1');
+      expect(result).toEqual(queued);
+    });
+
+    it('omits Idempotency-Key when not provided', async () => {
+      vi.stubGlobal('fetch', mock({ data: queued }, 202));
+      await tratto.emails.sendBatch(emails);
+      expect((calls()[0]![1].headers as Record<string, string>)['Idempotency-Key']).toBeUndefined();
+    });
+
+    it('resolves a 202 with failed > 0, in request order, with one fetch and no retry', async () => {
+      const partial = { batchId: 'batch_2', livemode: true, accepted: 1, failed: 1, emails: [
+        { id: 'email_1', status: 'queued', to: ['a@x.it'] },
+        { status: 'failed', to: ['b@x.it'], error: { code: 'SERVICE_UNAVAILABLE', message: 'try again' } },
+      ] };
+      vi.stubGlobal('fetch', mock({ data: partial }, 202));
+      const result = await tratto.emails.sendBatch(emails, 'key-2');
+
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+      expect(result.failed).toBe(1);
+      expect(result.emails.map(e => e.to[0])).toEqual(['a@x.it', 'b@x.it']);
+      const second = result.emails[1]!;
+      expect(second.status).toBe('failed');
+      if (second.status === 'failed') expect(second.error.code).toBe('SERVICE_UNAVAILABLE');
+      expect(second).not.toHaveProperty('id');
+    });
+
+    it('throws TrattoError on 503 after a single call', async () => {
+      vi.stubGlobal('fetch', mock({ error: { code: 'SERVICE_UNAVAILABLE', message: 'busy' } }, 503));
+      const err = await tratto.emails.sendBatch(emails, 'key-3').catch(e => e);
+      expect(err).toBeInstanceOf(TrattoError);
+      expect(err.statusCode).toBe(503);
+      expect(err.code).toBe('SERVICE_UNAVAILABLE');
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps error.details on a 422, so the caller knows which email is wrong', async () => {
+      vi.stubGlobal('fetch', mock({ error: {
+        code: 'VALIDATION_ERROR', message: 'invalid',
+        details: [{ path: '/emails/1/to', message: 'must be an email' }],
+      } }, 422));
+      const err = (await tratto.emails.sendBatch(emails).catch(e => e)) as TrattoError;
+      expect(err.statusCode).toBe(422);
+      expect((err.details?.[0] as { path: string }).path).toBe('/emails/1/to');
+    });
+
+    it('rejects scheduledAt and attachments at compile time', () => {
+      const withSchedule = { to: 'a@x.it', subject: 'A', html: '<p>A</p>', scheduledAt: '2030-01-01T00:00:00Z' };
+      // @ts-expect-error scheduledAt is not accepted in a batch
+      const a: BatchEmailParams = withSchedule;
+      // @ts-expect-error attachments are not accepted in a batch
+      const b: BatchEmailParams = { to: 'a@x.it', subject: 'A', html: '<p>A</p>', attachments: [] };
+      expect([a, b]).toHaveLength(2);
     });
   });
 

@@ -2,7 +2,7 @@
  * Smoke test: one real round-trip against the API, in test mode.
  *
  * Creates a contact, creates a template, sends an email to a simulator
- * address, reads the delivery status back, then cleans up what it created.
+ * address, reads the delivery status back, sends a two-email batch, then cleans up what it created.
  * It is the only thing in this repo that talks to a real server — everything
  * else stubs `fetch`. Run it by hand before releasing the SDK; it is
  * deliberately NOT wired into CI.
@@ -63,7 +63,7 @@ async function run() {
   if (previous) {
     contactId = previous.id;
     await tratto.contacts.update(contactId, { status: 'subscribed', customFields: { lastRun: stamp } });
-    console.log(`1/4 contact reused   ${contactId} (${previous.email})`);
+    console.log(`1/5 contact reused   ${contactId} (${previous.email})`);
   } else {
     const created = await tratto.contacts.create({
       email: CONTACT_EMAIL,
@@ -74,7 +74,7 @@ async function run() {
       customFields: { lastRun: stamp },
     });
     contactId = created.id;
-    console.log(`1/4 contact created  ${contactId} (${CONTACT_EMAIL})`);
+    console.log(`1/5 contact created  ${contactId} (${CONTACT_EMAIL})`);
   }
 
   // ── 2. Template ──────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ async function run() {
   if (template.format !== 'emailmd') {
     throw new Error(`expected format 'emailmd' for a markdown template, got '${template.format}'`);
   }
-  console.log(`2/4 template created ${templateId} (format ${template.format}, v${template.version})`);
+  console.log(`2/5 template created ${templateId} (format ${template.format}, v${template.version})`);
 
   // ── 3. Send ──────────────────────────────────────────────────────────────
   const { id: emailId } = await tratto.emails.send(
@@ -100,7 +100,7 @@ async function run() {
     },
     `sdk-smoke-${stamp}`,
   );
-  console.log(`3/4 email sent       ${emailId} -> ${TO}`);
+  console.log(`3/5 email sent       ${emailId} -> ${TO}`);
 
   // ── 4. Read the status back ──────────────────────────────────────────────
   const deadline = Date.now() + 60_000;
@@ -111,7 +111,7 @@ async function run() {
   }
 
   const events = await tratto.emails.listEvents(emailId);
-  console.log(`4/4 status           ${detail.status} after ${events.length} events`);
+  console.log(`4/5 status           ${detail.status} after ${events.length} events`);
   for (const e of events) console.log(`      ${e.occurredAt}  ${e.type}`);
 
   if (detail.status !== 'delivered') {
@@ -119,6 +119,17 @@ async function run() {
   }
   if (detail.templateId !== templateId) {
     throw new Error(`email reports templateId '${detail.templateId}', expected '${templateId}'`);
+  }
+
+  // ── 5. Batch ─────────────────────────────────────────────────────────────
+  const batch = await tratto.emails.sendBatch(
+    [1, 2].map(n => ({ from, to: TO, subject: `SDK smoke batch ${n} ${stamp}`, text: 'batch', tags: [TAG] })),
+    `sdk-smoke-batch-${stamp}`,
+  );
+  const ids = batch.emails.map(e => (e.status === 'queued' ? e.id : `failed:${e.error.code}`));
+  console.log(`5/5 batch sent       ${batch.batchId} accepted ${batch.accepted} failed ${batch.failed} [${ids.join(', ')}]`);
+  if (batch.accepted !== 2 || batch.failed !== 0) {
+    throw new Error(`expected 2 accepted and 0 failed in the batch, got ${batch.accepted}/${batch.failed}`);
   }
 }
 

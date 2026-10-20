@@ -1,5 +1,5 @@
 /**
- * Example: Send transactional emails — plain HTML, template-based, with idempotency, in a batch.
+ * Example: Send transactional emails: plain HTML, template-based, with idempotency, in a batch.
  *
  * Run:
  *   TRATTO_API_KEY=tratto_live_... npx tsx examples/send-email.ts

@@ -113,7 +113,9 @@ describe('EmailsResource', () => {
       const result = await tratto.emails.sendBatch(emails, 'key-2');
 
       expect(globalThis.fetch).toHaveBeenCalledTimes(1);
-      expect(result.failed).toBe(1);
+      // Type-level: typecheck fails if `failed` ever becomes optional.
+      const failedCount: number = result.failed;
+      expect(failedCount).toBe(1);
       expect(result.emails.map(e => e.to[0])).toEqual(['a@x.it', 'b@x.it']);
       const second = result.emails[1]!;
       expect(second.status).toBe('failed');
@@ -144,8 +146,9 @@ describe('EmailsResource', () => {
       const withSchedule = { to: 'a@x.it', subject: 'A', html: '<p>A</p>', scheduledAt: '2030-01-01T00:00:00Z' };
       // @ts-expect-error scheduledAt is not accepted in a batch
       const a: BatchEmailParams = withSchedule;
+      const withAttachments = { to: 'a@x.it', subject: 'A', html: '<p>A</p>', attachments: [] };
       // @ts-expect-error attachments are not accepted in a batch
-      const b: BatchEmailParams = { to: 'a@x.it', subject: 'A', html: '<p>A</p>', attachments: [] };
+      const b: BatchEmailParams = withAttachments;
       expect([a, b]).toHaveLength(2);
     });
   });

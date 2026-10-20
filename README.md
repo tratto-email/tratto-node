@@ -200,7 +200,10 @@ The SDK does not retry. When you do:
 
 - **503 `SERVICE_UNAVAILABLE` or 500 `INTERNAL_ERROR`**: nothing was sent;
   repeat the same call with the **same** key.
-- **429 `RATE_LIMITED`**: wait 1 second, then repeat.
+- **429 `RATE_LIMITED`**: wait 1 second, then repeat with the **same** key.
+- **429 `QUOTA_EXCEEDED`**: do not retry; nothing was sent.
+- **409 `IDEMPOTENCY_IN_PROGRESS`**: the same request is still being
+  processed; wait, then repeat with the **same** key.
 - **202 with `failed > 0`**: send only the failed emails, in a **new** batch
   with a **new** key. Repeating the same key returns the same response.
 

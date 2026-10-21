@@ -43,12 +43,14 @@ export abstract class BaseResource {
         message?: string;
         code?: string;
         docs?: string;
+        details?: unknown[];
       };
       throw new TrattoError(
         err.message ?? res.statusText,
         err.code ?? 'unknown_error',
         res.status,
         err.docs,
+        err.details,
       );
     }
 

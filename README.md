@@ -168,6 +168,49 @@ const { id } = await tratto.emails.send({
 });
 ```
 
+#### `emails.sendBatch(emails, idempotencyKey?)`
+
+Send up to 100 emails in one request (requires `@tratto/email` 1.6.0 or
+later). Each email takes the same fields as `emails.send()`, except
+`scheduledAt` (a batch is sent immediately) and attachments. One
+idempotency key covers the whole batch. See
+[Send a batch](https://docs.tratto.email/en/docs/send-batch).
+
+The call resolves whenever the API answers 202, **also when some emails
+failed**: `failed` counts them and `emails` reports each one in request
+order. A failed email has no `id`.
+
+```ts
+const batch = await tratto.emails.sendBatch(
+  [
+    { to: 'alice@example.com', subject: 'Your order shipped', html: '<p>On its way.</p>' },
+    { to: 'bob@example.com', subject: 'Your order shipped', html: '<p>On its way.</p>' },
+  ],
+  crypto.randomUUID(),
+);
+
+if (batch.failed > 0) {
+  for (const e of batch.emails) {
+    if (e.status === 'failed') console.error(e.to, e.error.code, e.error.message);
+  }
+}
+```
+
+The SDK does not retry. When you do:
+
+- **503 `SERVICE_UNAVAILABLE` or 500 `INTERNAL_ERROR`**: nothing was sent;
+  repeat the same call with the **same** key.
+- **429 `RATE_LIMITED`**: wait 1 second, then repeat with the **same** key.
+- **429 `QUOTA_EXCEEDED`**: do not retry; nothing was sent.
+- **409 `IDEMPOTENCY_IN_PROGRESS`**: the same request is still being
+  processed; wait, then repeat with the **same** key.
+- **202 with `failed > 0`**: send only the failed emails, in a **new** batch
+  with a **new** key. Repeating the same key returns the same response.
+
+A 422 tells you which email is wrong in `err.details`, for example
+`[{ path: '/emails/3/to', message: '...' }]` (see
+[Error handling](#error-handling)).
+
 #### `emails.list(params?)`
 
 ```ts
@@ -458,7 +501,9 @@ the API refuses these calls for API keys, so `inviteMember()` and
 
 ## Error handling
 
-Failed HTTP requests throw a `TrattoError` with `code`, `statusCode`, and an optional `docs` URL.
+Failed HTTP requests throw a `TrattoError` with `code`, `statusCode`, an optional `docs` URL and,
+on validation errors (422), an optional `details` array that says which field is wrong
+(requires `@tratto/email` 1.6.0 or later).
 
 ```ts
 import { Tratto, TrattoError } from '@tratto/email';
@@ -484,6 +529,8 @@ Full type declarations are exported:
 ```ts
 import type {
   SendEmailParams,
+  BatchEmailParams,
+  SendBatchResponse,
   EmailDetail,
   EmailEvent,
   PaginatedResponse,
@@ -511,7 +558,7 @@ See the [`examples/`](examples/) folder:
 
 | File | Description |
 |---|---|
-| [`send-email.ts`](examples/send-email.ts) | Send transactional emails (HTML, template, with idempotency), read the timeline |
+| [`send-email.ts`](examples/send-email.ts) | Send transactional emails (HTML, template, with idempotency, in a batch), read the timeline |
 | [`contacts.ts`](examples/contacts.ts) | Contact management and CSV bulk import |
 | [`audiences.ts`](examples/audiences.ts) | Rule-based audiences, adding contacts to one |
 | [`campaign.ts`](examples/campaign.ts) | Create, configure, send, unschedule and pause a marketing campaign |

@@ -1,6 +1,8 @@
 import { BaseResource } from './base';
 import type {
   SendEmailParams,
+  BatchEmailParams,
+  SendBatchResponse,
   ListEmailsParams,
   EmailSummary,
   EmailDetail,
@@ -12,6 +14,18 @@ export class EmailsResource extends BaseResource {
   send(params: SendEmailParams, idempotencyKey?: string): Promise<{ id: string }> {
     return this.fetchData<{ id: string }>('POST', '/v1/emails', {
       body: params,
+      headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,
+    });
+  }
+
+  /**
+   * Sends up to 100 emails in one request. One `Idempotency-Key` covers the
+   * whole batch. Resolves on every 202, also when some emails failed
+   * (`failed > 0`): retry only those, in a new batch with a new key.
+   */
+  sendBatch(emails: BatchEmailParams[], idempotencyKey?: string): Promise<SendBatchResponse> {
+    return this.fetchData<SendBatchResponse>('POST', '/v1/emails/batch', {
+      body: { emails },
       headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,
     });
   }

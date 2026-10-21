@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 1.6.0
+
+- `emails.sendBatch(emails, idempotencyKey?)` sends up to 100 emails in one
+  request (`POST /v1/emails/batch`, API 0.22.0 or later). Each email takes the
+  fields of `emails.send()` except `scheduledAt` and attachments, which the
+  types reject. It resolves on every 202, also when some emails failed:
+  `failed` counts them and `emails` reports each one in request order
+  (`status: 'queued'` with `id`, or `status: 'failed'` with `error`). The SDK
+  does not retry. New types: `BatchEmailParams`, `BatchEmailResult`,
+  `SendBatchResponse`.
+- `TrattoError` has a `details` property: the `error.details` array of the API
+  response, e.g. `[{ path: '/emails/3/to', message }]` on a 422. It applies to
+  every method, `emails.send()` included.
+
 ## 1.5.0
 
 - `from` is optional in `emails.send()` (`SendEmailParams`). When it is

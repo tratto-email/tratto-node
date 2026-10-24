@@ -508,7 +508,8 @@ export interface ListFlowsParams {
 
 // ── Workspace ─────────────────────────────────────────────────────────────────
 
-export type WorkspacePlan = 'free' | 'starter' | 'growth';
+/** The plan of the account that owns the workspace. `'scale'` requires API 0.27.0 or later. */
+export type WorkspacePlan = 'free' | 'starter' | 'growth' | 'scale';
 export type WorkspaceMemberRole = 'owner' | 'admin' | 'member';
 export type WorkspaceLocale = 'it' | 'en';
 

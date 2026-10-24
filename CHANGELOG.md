@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.6.1
+
+- `WorkspacePlan` includes `'scale'`, the plan added in API 0.27.0, so
+  `workspace.get()` types the plan of a Scale account correctly.
+
 ## 1.6.0
 
 - `emails.sendBatch(emails, idempotencyKey?)` sends up to 100 emails in one

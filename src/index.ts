@@ -14,6 +14,12 @@ export type {
   EmailSummary,
   EmailEvent,
   EmailDetail,
+  EmailAttachment,
+  EmailFailureReason,
+  // Attachments
+  Attachment,
+  AttachmentContent,
+  UploadAttachmentParams,
   // Contacts
   ContactStatus,
   Contact,
@@ -48,6 +54,7 @@ export type {
   TemplateVersion,
   // Webhooks
   WebhookEventType,
+  FailedEventData,
   WebhookStatus,
   WebhookDeliveryStatus,
   Webhook,

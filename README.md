@@ -172,7 +172,7 @@ const { id } = await tratto.emails.send({
 
 Send up to 100 emails in one request (requires `@tratto/email` 1.6.0 or
 later). Each email takes the same fields as `emails.send()`, except
-`scheduledAt` (a batch is sent immediately) and attachments. One
+`scheduledAt` (a batch is sent immediately). One
 idempotency key covers the whole batch. See
 [Send a batch](https://docs.tratto.email/en/docs/send-batch).
 
@@ -232,6 +232,42 @@ console.log(email.events);
 ```ts
 const events = await tratto.emails.listEvents('em_abc123');
 ```
+
+A failed email carries `failureReason` (for example `template_not_found` or
+`attachment_unavailable`), the same code as `data.reason` of the `failed`
+webhook event. The set is open: handle unknown values.
+
+---
+
+### Attachments
+
+Requires `@tratto/email` 1.7.0 or later, and a paid plan (the Free plan answers
+403 `PLAN_UPGRADE_REQUIRED`). Upload the file first, then reference it by id
+from `emails.send()` or `emails.sendBatch()`. A full workspace storage answers
+429 `QUOTA_EXCEEDED`: delete attachments you no longer need.
+
+```ts
+import { readFile } from 'node:fs/promises';
+
+const file = await tratto.attachments.upload(await readFile('invoice.pdf'), {
+  filename: 'invoice.pdf',
+  contentType: 'application/pdf',
+});
+
+await tratto.emails.send({
+  to: 'user@example.com',
+  subject: 'Your invoice',
+  html: '<p>Attached.</p>',
+  attachments: [{ id: file.id }],
+});
+
+const meta = await tratto.attachments.get(file.id); // metadata only, never the bytes
+await tratto.attachments.delete(file.id);
+```
+
+The content can be a `Buffer`, `Uint8Array`, `ArrayBuffer` or `Blob`. Live
+attachments expire (`expiresAt`); an email queued with an attachment that was
+deleted or expired fails with `failureReason: 'attachment_unavailable'`.
 
 ---
 
@@ -406,6 +442,11 @@ const { secret: newSecret } = await tratto.webhooks.rotateSecret(id);
 // Delete
 await tratto.webhooks.delete(id);
 ```
+
+The `failed` event (an email that was not sent) is delivered only to webhooks
+that list it in `events`. Its `data` is `{ reason, error }`, typed as
+`FailedEventData`; `reason` is the same code as `failureReason` on
+`emails.get()`.
 
 ---
 

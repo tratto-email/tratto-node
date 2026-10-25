@@ -66,6 +66,21 @@ describe('EmailsResource', () => {
       expect((init.headers as Record<string, string>)['Idempotency-Key']).toBe('key-123');
     });
 
+    it('sends attachments by id', async () => {
+      vi.stubGlobal('fetch', mock({ data: { id: 'em_1' } }));
+      await tratto.emails.send({ to: 'c@d.com', subject: 'Hi', html: '<p>Hi</p>', attachments: [{ id: 'att_1' }] });
+      const [, init] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
+      expect(JSON.parse(String(init.body)).attachments).toEqual([{ id: 'att_1' }]);
+    });
+
+    it('surfaces PLAN_UPGRADE_REQUIRED as a TrattoError', async () => {
+      vi.stubGlobal('fetch', mock({ error: { code: 'PLAN_UPGRADE_REQUIRED', message: 'Starter plan' } }, 403));
+      const err = await tratto.emails.send({ to: 'c@d.com', subject: 'Hi', html: '<p>Hi</p>', attachments: [{ id: 'att_1' }] }).catch(e => e);
+      expect(err).toBeInstanceOf(TrattoError);
+      expect(err.statusCode).toBe(403);
+      expect(err.code).toBe('PLAN_UPGRADE_REQUIRED');
+    });
+
     it('omits Idempotency-Key when not provided', async () => {
       vi.stubGlobal('fetch', mock({ data: { id: 'em_1' } }));
       await tratto.emails.send({ from: 'a@b.com', to: 'c@d.com', subject: 'Hi', html: '<p>Hi</p>' });
@@ -142,14 +157,18 @@ describe('EmailsResource', () => {
       expect((err.details?.[0] as { path: string }).path).toBe('/emails/1/to');
     });
 
-    it('rejects scheduledAt and attachments at compile time', () => {
+    it('rejects scheduledAt at compile time', () => {
       const withSchedule = { to: 'a@x.it', subject: 'A', html: '<p>A</p>', scheduledAt: '2030-01-01T00:00:00Z' };
       // @ts-expect-error scheduledAt is not accepted in a batch
       const a: BatchEmailParams = withSchedule;
-      const withAttachments = { to: 'a@x.it', subject: 'A', html: '<p>A</p>', attachments: [] };
-      // @ts-expect-error attachments are not accepted in a batch
-      const b: BatchEmailParams = withAttachments;
-      expect([a, b]).toHaveLength(2);
+      expect(a).toBeDefined();
+    });
+
+    it('sends attachments by id on each email', async () => {
+      vi.stubGlobal('fetch', mock({ data: queued }, 202));
+      const withFiles: BatchEmailParams[] = [{ to: 'a@x.it', subject: 'A', html: '<p>A</p>', attachments: [{ id: 'att_1' }] }];
+      await tratto.emails.sendBatch(withFiles);
+      expect(JSON.parse(String(calls()[0]![1].body)).emails[0].attachments).toEqual([{ id: 'att_1' }]);
     });
   });
 
@@ -203,6 +222,14 @@ describe('EmailsResource', () => {
       const [url] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string];
       expect(url).toBe(`${BASE}/v1/emails/em_1`);
       expect((result as { id: string }).id).toBe('em_1');
+    });
+
+    it('returns attachments and failureReason', async () => {
+      const attachments = [{ id: 'att_1', filename: 'a.pdf', contentType: 'application/pdf', size: 3 }];
+      vi.stubGlobal('fetch', mock({ data: { id: 'em_1', status: 'failed', failureReason: 'attachment_unavailable', attachments, events: [] } }));
+      const result = await tratto.emails.get('em_1');
+      expect(result.attachments).toEqual(attachments);
+      expect(result.failureReason).toBe('attachment_unavailable');
     });
   });
 

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- `attachments.upload(content, { filename, contentType })`, `attachments.get(id)`
+  and `attachments.delete(id)` (`/v1/attachments`). Non-ASCII filenames are
+  sent as `filename*=UTF-8''…`. New types: `Attachment`, `AttachmentContent`,
+  `UploadAttachmentParams`.
+- `emails.send()` and `emails.sendBatch()` accept `attachments: [{ id }]`.
+  `emails.get()` returns `attachments` (`EmailAttachment[]`).
+- `failureReason` on emails (`EmailFailureReason`, an open set).
+- `WebhookEventType` includes `'failed'`; its `data` is typed as
+  `FailedEventData` (`{ reason, error }`).
+
 ## 1.6.1
 
 - `WorkspacePlan` includes `'scale'`, the plan added in API 0.27.0, so

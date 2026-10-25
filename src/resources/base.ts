@@ -24,12 +24,11 @@ export abstract class BaseResource {
       ...options?.headers,
     };
 
-    let body: string | undefined;
+    // An explicit contentType means the body is already in its wire form
+    // (CSV text, file bytes), even when that type is application/json.
+    let body: BodyInit | undefined;
     if (hasBody) {
-      body =
-        contentType === 'application/json'
-          ? JSON.stringify(options!.body)
-          : (options!.body as string);
+      body = options?.contentType ? (options.body as BodyInit) : JSON.stringify(options!.body);
     }
 
     const res = await globalThis.fetch(`${this.baseUrl}${path}`, { method, headers, body });

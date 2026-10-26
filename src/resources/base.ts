@@ -24,19 +24,25 @@ export abstract class BaseResource {
       ...options?.headers,
     };
 
-    let body: string | undefined;
+    // An explicit contentType means the body is already in its wire form
+    // (CSV text, file bytes), even when that type is application/json.
+    let body: BodyInit | undefined;
     if (hasBody) {
-      body =
-        contentType === 'application/json'
-          ? JSON.stringify(options!.body)
-          : (options!.body as string);
+      body = options?.contentType ? (options.body as BodyInit) : JSON.stringify(options!.body);
     }
 
     const res = await globalThis.fetch(`${this.baseUrl}${path}`, { method, headers, body });
 
     if (res.status === 204) return undefined as T;
 
-    const json = (await res.json()) as Record<string, unknown>;
+    let json: Record<string, unknown>;
+    try {
+      json = (await res.json()) as Record<string, unknown>;
+    } catch (e) {
+      // A non-JSON error body (e.g. an HTML 413 from the front end) still becomes a TrattoError.
+      if (!res.ok) throw new TrattoError(res.statusText || 'HTTP error', 'unknown_error', res.status);
+      throw e;
+    }
 
     if (!res.ok) {
       const err = (json['error'] ?? {}) as {

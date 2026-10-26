@@ -43,16 +43,23 @@ export interface SendEmailParams {
   tags?: string[];
   scheduledAt?: Date | string;
   headers?: Record<string, string>;
+  /**
+   * Files uploaded with `attachments.upload()`, by id, each at most once.
+   * Content plus attachments must fit the size limit (422). Not available on
+   * the Free plan (403 `PLAN_UPGRADE_REQUIRED`). An id of another workspace
+   * is 404; an attachment of the other mode (live/test), or one expiring
+   * less than an hour after the send, is 422.
+   */
+  attachments?: { id: string }[];
 }
 
 /**
  * One email of `emails.sendBatch()`: the fields of `SendEmailParams` except
- * `scheduledAt` (a batch is sent immediately) and `attachments`, which the
- * batch route rejects with 422. Type-level only: the API is the one that checks.
+ * `scheduledAt` (a batch is sent immediately). Type-level only: the API is
+ * the one that checks.
  */
 export type BatchEmailParams = Omit<SendEmailParams, 'scheduledAt'> & {
   scheduledAt?: never;
-  attachments?: never;
 };
 
 /** Outcome of one email in a batch, in the same position as in the request. */
@@ -89,7 +96,28 @@ export interface EmailSummary {
   sentAt: string | null;
   scheduledAt: string | null;
   tags?: string[];
+  /**
+   * Why a failed email was not sent, the same code as `data.reason` of the
+   * `failed` webhook event. Absent on emails that failed before the field
+   * existed. An open set: handle unknown values.
+   */
+  failureReason?: EmailFailureReason;
 }
+
+/**
+ * Known codes of `failureReason`. `interrupted` is the only one that is not
+ * final: the email may still become delivered, bounced or complained.
+ */
+export type EmailFailureReason =
+  | 'interrupted'
+  | 'tenant_not_active'
+  | 'sender_domain_unverified'
+  | 'template_not_found'
+  | 'template_not_published'
+  | 'template_empty'
+  | 'provider_rejected'
+  | 'attachment_unavailable'
+  | (string & {});
 
 export interface EmailEvent {
   type: string;
@@ -105,7 +133,43 @@ export interface EmailDetail extends EmailSummary {
   replyTo?: string;
   templateId?: string;
   headers?: Record<string, string>;
+  /** The attachments sent with the email, as they were when it was accepted. */
+  attachments?: EmailAttachment[];
   events: EmailEvent[];
+}
+
+export interface EmailAttachment {
+  id: string;
+  filename: string;
+  contentType: string;
+  size: number;
+}
+
+// ── Attachments ───────────────────────────────────────────────────────────────
+
+/** File bytes for `attachments.upload()`. A Node `Buffer` is a `Uint8Array`. */
+export type AttachmentContent = Uint8Array | ArrayBuffer | Blob;
+
+export interface UploadAttachmentParams {
+  /** As the recipient will see it. Non-ASCII names are supported. */
+  filename: string;
+  /** Stored as declared, without parameters, e.g. `application/pdf`. */
+  contentType: string;
+}
+
+export interface Attachment {
+  /** `att_` followed by 21 characters. */
+  id: string;
+  /** As the recipient will see it, after sanitising. */
+  filename: string;
+  contentType: string;
+  /** Bytes. */
+  size: number;
+  /** Hex SHA-256 of the bytes. */
+  sha256: string;
+  livemode: boolean;
+  /** After this instant the attachment can no longer be sent. */
+  expiresAt: string;
 }
 
 // ── Contacts ──────────────────────────────────────────────────────────────────
@@ -356,7 +420,16 @@ export type WebhookEventType =
   | 'clicked'
   | 'bounced'
   | 'complained'
-  | 'unsubscribed';
+  | 'unsubscribed'
+  /** The email was not sent. Delivered only to webhooks that list it. */
+  | 'failed';
+
+/** `data` of a `failed` webhook event. */
+export interface FailedEventData {
+  /** Same code as `failureReason` on `emails.get()`. */
+  reason: EmailFailureReason;
+  error: string;
+}
 
 export type WebhookStatus = 'active' | 'disabled';
 export type WebhookDeliveryStatus = 'success' | 'failed' | 'scheduled';

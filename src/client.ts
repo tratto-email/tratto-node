@@ -9,6 +9,7 @@ import { DomainsResource } from './resources/domains';
 import { AnalyticsResource } from './resources/analytics';
 import { FlowsResource } from './resources/flows';
 import { WorkspaceResource } from './resources/workspace';
+import { AttachmentsResource } from './resources/attachments';
 
 export interface TrattoOptions {
   baseUrl?: string;
@@ -25,6 +26,7 @@ export class Tratto {
   readonly analytics: AnalyticsResource;
   readonly flows: FlowsResource;
   readonly workspace: WorkspaceResource;
+  readonly attachments: AttachmentsResource;
 
   constructor(apiKey: string, options?: TrattoOptions) {
     if (!apiKey) throw new Error('apiKey is required');
@@ -39,6 +41,7 @@ export class Tratto {
     this.analytics = new AnalyticsResource(apiKey, baseUrl);
     this.flows = new FlowsResource(apiKey, baseUrl);
     this.workspace = new WorkspaceResource(apiKey, baseUrl);
+    this.attachments = new AttachmentsResource(apiKey, baseUrl);
   }
 }
 

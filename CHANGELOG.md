@@ -1,7 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.7.0
 
+- A non-JSON error response (for example an HTML 413 page for an upload over
+  the size limit) throws `TrattoError` with `code: 'unknown_error'` and the HTTP
+  status, instead of a `SyntaxError`.
 - `attachments.upload(content, { filename, contentType })`, `attachments.get(id)`
   and `attachments.delete(id)` (`/v1/attachments`). Non-ASCII filenames are
   sent as `filename*=UTF-8''…`. New types: `Attachment`, `AttachmentContent`,

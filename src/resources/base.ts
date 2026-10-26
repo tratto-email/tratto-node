@@ -35,7 +35,14 @@ export abstract class BaseResource {
 
     if (res.status === 204) return undefined as T;
 
-    const json = (await res.json()) as Record<string, unknown>;
+    let json: Record<string, unknown>;
+    try {
+      json = (await res.json()) as Record<string, unknown>;
+    } catch (e) {
+      // A non-JSON error body (e.g. an HTML 413 from the front end) still becomes a TrattoError.
+      if (!res.ok) throw new TrattoError(res.statusText || 'HTTP error', 'unknown_error', res.status);
+      throw e;
+    }
 
     if (!res.ok) {
       const err = (json['error'] ?? {}) as {

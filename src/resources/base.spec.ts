@@ -117,6 +117,28 @@ describe('BaseResource', () => {
       });
     });
 
+    it('throws TrattoError when a non-ok response body is not JSON', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: false,
+        status: 413,
+        statusText: 'Payload Too Large',
+        json: () => Promise.reject(new SyntaxError("Unexpected token '<'")),
+      }));
+      const err = await res.doFetch('POST', '/v1/attachments').catch(e => e);
+      expect(err).toBeInstanceOf(TrattoError);
+      expect(err).toMatchObject({ message: 'Payload Too Large', code: 'unknown_error', statusCode: 413 });
+    });
+
+    it('falls back to "HTTP error" when a non-JSON error has no statusText', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: false,
+        status: 502,
+        statusText: '',
+        json: () => Promise.reject(new SyntaxError('Unexpected end of JSON input')),
+      }));
+      await expect(res.doFetch('GET', '/v1/emails')).rejects.toMatchObject({ message: 'HTTP error', statusCode: 502 });
+    });
+
     it('thrown error is instanceof TrattoError', async () => {
       vi.stubGlobal('fetch', makeFetch({ error: { message: 'err', code: 'err' } }, 400));
 

@@ -104,6 +104,24 @@ describe('BaseResource', () => {
       });
     });
 
+    // `suggestion` says what to do next (e.g. the 409 of a campaign whose test
+    // wave is being measured). Typed access without a cast is part of the test.
+    it('exposes the API suggestion on TrattoError, independently of message', async () => {
+      vi.stubGlobal('fetch', makeFetch(
+        { error: { message: 'm', code: 'CONFLICT', suggestion: 'Wait for the test wave to end, then retry.' } },
+        409,
+      ));
+      const err = (await res.doFetch('POST', '/v1/campaigns/c/send').catch(e => e)) as TrattoError;
+      const suggestion: string | undefined = err.suggestion;
+      expect(suggestion).toBe('Wait for the test wave to end, then retry.');
+    });
+
+    it('leaves suggestion undefined, not empty, when the API omits it', async () => {
+      vi.stubGlobal('fetch', makeFetch({ error: { message: 'Not found', code: 'NOT_FOUND' } }, 404));
+      const err = (await res.doFetch('GET', '/v1/test').catch(e => e)) as TrattoError;
+      expect(err.suggestion).toBeUndefined();
+    });
+
     it('throws TrattoError with statusText fallback when error body is absent', async () => {
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
         ok: false, status: 500, statusText: 'Internal Server Error',

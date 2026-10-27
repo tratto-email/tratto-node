@@ -87,6 +87,7 @@ export type {
   WorkspaceMemberRole,
   WorkspaceLocale,
   Workspace,
+  WorkspaceLimits,
   SendType,
   Sender,
   Senders,

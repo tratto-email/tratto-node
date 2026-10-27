@@ -375,7 +375,9 @@ await tratto.campaigns.pause(id);
 
 // Why a campaign is paused: 'quota_exceeded', 'schedule_missed',
 // 'bounce_rate' (it stopped itself on too many permanent bounces),
-// or null when it was paused by hand.
+// 'quota_unavailable' (the quota could not be read, an error on Tratto's
+// side; resumable; typed from @tratto/email 1.8.0), or null when it was
+// paused by hand.
 const campaign = await tratto.campaigns.get(id);
 if (campaign.pausedReason === 'bounce_rate') {
   console.log('Stopped: too many bounces. Clean the list before resuming.');
@@ -521,6 +523,9 @@ await tratto.flows.delete(id);
 // Get current workspace
 const ws = await tratto.workspace.get();
 console.log(ws.name, ws.plan);
+// Plan caps (from @tratto/email 1.8.0); null means no limit. domains counts
+// every workspace of the account that owns this one.
+console.log(ws.limits.domains, ws.limits.emailsPerMonth);
 
 // Update settings
 await tratto.workspace.update({ name: 'Acme Corp', timezone: 'Europe/Rome' });
@@ -545,7 +550,8 @@ the API refuses these calls for API keys, so `inviteMember()` and
 
 Failed HTTP requests throw a `TrattoError` with `code`, `statusCode`, an optional `docs` URL and,
 on validation errors (422), an optional `details` array that says which field is wrong
-(requires `@tratto/email` 1.6.0 or later).
+(requires `@tratto/email` 1.6.0 or later). When the API says what to do next, the error also carries
+`suggestion`, a string; it is `undefined` when the API sends none (requires `@tratto/email` 1.8.0 or later).
 
 A request that exceeds the `timeout` option throws a `TrattoError` with `code: 'timeout'` and
 `statusCode: 0`: no response arrived, so the request may or may not have been processed. To retry an
@@ -559,6 +565,7 @@ try {
 } catch (err) {
   if (err instanceof TrattoError) {
     console.error(`[${err.statusCode}] ${err.code}: ${err.message}`);
+    if (err.suggestion) console.error('Next step:', err.suggestion);
     if (err.docs) console.error('Docs:', err.docs);
   } else {
     throw err;
@@ -592,6 +599,7 @@ import type {
   TimeseriesPoint,
   Flow,
   Workspace,
+  WorkspaceLimits,
   WorkspaceMember,
 } from '@tratto/email';
 ```

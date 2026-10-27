@@ -282,8 +282,14 @@ export type CampaignStatus = 'draft' | 'sending' | 'scheduled' | 'paused' | 'com
  * - `quota_exceeded` — the dispatcher hit the monthly plan cap mid-send.
  * - `schedule_missed` — the scheduled send window passed without dispatch.
  * - `bounce_rate` — too many permanent bounces, the campaign stopped itself.
+ * - `quota_unavailable`: the monthly quota could not be read (an error on
+ *   Tratto's side, not an exhausted quota). The campaign can be resumed.
  */
-export type CampaignPausedReason = 'quota_exceeded' | 'schedule_missed' | 'bounce_rate';
+export type CampaignPausedReason =
+  | 'quota_exceeded'
+  | 'schedule_missed'
+  | 'bounce_rate'
+  | 'quota_unavailable';
 
 export interface CampaignStats {
   total: number;
@@ -614,6 +620,27 @@ export interface Sender {
  */
 export type Senders = Record<SendType, Sender | null>;
 
+/** Caps of the workspace plan, as `workspace.get()` returns them. */
+export interface WorkspaceLimits {
+  /**
+   * Max sending domains across every workspace of the account that owns this
+   * one, pending and failed included. `null` means no limit.
+   */
+  domains: number | null;
+  /** Max emails per UTC month (each address in to, cc and bcc counts as one). `null` means no limit. */
+  emailsPerMonth: number | null;
+  /** Max distinct people across every workspace of the account, owner and pending invites included. 1 means the plan does not invite. */
+  membersPerAccount: number;
+  /** Same number as `membersPerAccount`. */
+  membersPerWorkspace: number;
+  /** Max workspaces the account may own, active and suspended. */
+  workspaces: number;
+  /** Whether the plan includes webhooks. */
+  webhooks: boolean;
+  /** Max test sends per workspace per UTC day, template and campaign together. */
+  testSendsPerDay: number;
+}
+
 export interface Workspace {
   id: string;
   name: string;
@@ -621,6 +648,7 @@ export interface Workspace {
   timezone: string;
   locale: WorkspaceLocale;
   plan: WorkspacePlan;
+  limits: WorkspaceLimits;
   /** Workspace default sender, used when a send does not specify one. */
   defaultFromName: string | null;
   defaultFromEmail: string | null;

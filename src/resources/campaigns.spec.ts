@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Tratto } from '../client';
+import type { CampaignPausedReason } from '../types';
 
 const API_KEY = 'tratto_test_key';
 const BASE = 'https://api.tratto.email';
@@ -46,6 +47,13 @@ describe('CampaignsResource', () => {
     vi.stubGlobal('fetch', mock({ data: { ...CAMPAIGN, status: 'paused', pausedReason: 'bounce_rate' } }));
     const campaign = await tratto.campaigns.get('cmp_1');
     expect(campaign.pausedReason).toBe('bounce_rate');
+  });
+
+  it('get() types the quota_unavailable pause reason', async () => {
+    vi.stubGlobal('fetch', mock({ data: { ...CAMPAIGN, status: 'paused', pausedReason: 'quota_unavailable' } }));
+    const campaign = await tratto.campaigns.get('cmp_1');
+    const reason: CampaignPausedReason | null = 'quota_unavailable';
+    expect(campaign.pausedReason).toBe(reason);
   });
 
   it('getStats() GETs /v1/campaigns/:id/stats', async () => {

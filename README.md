@@ -472,6 +472,37 @@ that list it in `events`. Its `data` is `{ reason, error }`, typed as
 `FailedEventData`; `reason` is the same code as `failureReason` on
 `emails.get()`.
 
+#### Verify a webhook delivery
+
+`verifyWebhook(payload, header, secret, options?)` checks the
+`X-Tratto-Signature` header (requires `@tratto/email` 1.8.0 or later). Pass the
+**raw** request body, a string or the bytes, before any JSON parsing: a
+re-serialized body does not match. It returns `true` only for an authentic
+delivery signed within the last 5 minutes (`toleranceSeconds`, default 300),
+compares in constant time, and accepts any of several `v1` signatures (as
+sent during a secret rotation). It throws only on an empty secret or a
+negative tolerance.
+
+```ts
+import express from 'express';
+import { verifyWebhook } from '@tratto/email';
+
+app.post('/webhooks/tratto', express.raw({ type: 'application/json' }), (req, res) => {
+  const ok = verifyWebhook(
+    req.body, // Buffer, thanks to express.raw()
+    req.header('x-tratto-signature'),
+    process.env.TRATTO_WEBHOOK_SECRET!,
+  );
+  if (!ok) return res.status(401).end();
+
+  const event = JSON.parse(req.body.toString('utf8'));
+  res.status(200).end();
+  // process event...
+});
+```
+
+See [Webhook signature verification](https://docs.tratto.email/en/docs/webhook-verification).
+
 ---
 
 ### Domains

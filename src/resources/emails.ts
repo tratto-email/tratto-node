@@ -50,4 +50,23 @@ export class EmailsResource extends BaseResource {
   listEvents(id: string): Promise<EmailEvent[]> {
     return this.fetchData<EmailEvent[]>('GET', path`/v1/emails/${id}/events`);
   }
+
+  /**
+   * Cancels an email still in `scheduled` and gives its quota back. Any other
+   * status answers 409. Can answer 429 RATE_LIMITED: safe to retry.
+   */
+  cancel(id: string): Promise<void> {
+    return this.fetch<void>('DELETE', path`/v1/emails/${id}`);
+  }
+
+  /**
+   * Moves a scheduled email to a new future date. Moving it to another UTC
+   * month can answer 429 QUOTA_EXCEEDED (that month is full); 429
+   * RATE_LIMITED is safe to retry.
+   */
+  reschedule(id: string, scheduledAt: Date | string): Promise<{ id: string; scheduledAt: string }> {
+    return this.fetchData<{ id: string; scheduledAt: string }>('PATCH', path`/v1/emails/${id}`, {
+      body: { scheduledAt },
+    });
+  }
 }

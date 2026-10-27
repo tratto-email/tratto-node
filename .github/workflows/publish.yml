@@ -10,7 +10,7 @@ jobs:
     # Must match the "production" environment configured on the npm Trusted
     # Publisher settings for @tratto/email — the OIDC token's claims
     # include this environment name, and npm validates it against that
-    # config. Same pattern as tratto-angular and tratto-react.
+    # config. Same pattern as tratto-angular.
     environment: production
     permissions:
       contents: read

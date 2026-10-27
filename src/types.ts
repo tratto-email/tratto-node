@@ -550,12 +550,32 @@ export type FlowStepType =
 
 export interface FlowTrigger {
   type: FlowTriggerType;
+  /**
+   * String values; unknown keys are ignored without an error. An omitted key
+   * matches any value.
+   * - `contact_joins_audience`: `audienceId`
+   * - `contact_tag_added`, `contact_tag_removed`: `tagName`
+   * - `email_event`: `eventType`, `emailId`
+   * - `manual`: none
+   */
   config: Record<string, string>;
 }
 
 export interface FlowStep {
   id: string;
   type: FlowStepType;
+  /**
+   * String values; unknown keys are ignored without an error.
+   * - `send_email`: `templateId`, `subject`, `from`, `fromName`, `replyTo`
+   * - `wait`: `delay` (a number, default `'5'`) and `unit` (`seconds`,
+   *   `minutes`, `hours` or `days`, default `minutes`)
+   * - `branch`: `conditionField`, `conditionOperator` (`equals`, `not_equals`,
+   *   `exists`, `not_exists`, `contains`), `conditionValue`, `trueNextStep` and
+   *   `falseNextStep` (zero-based step indexes)
+   * - `update_contact`: `action` (`set_field`, the default, with `field` and
+   *   `value`; or `add_tag` / `remove_tag` with `tag`)
+   * - `webhook_call`: `url`, `method` (default `POST`), `secret`
+   */
   config: Record<string, string>;
 }
 

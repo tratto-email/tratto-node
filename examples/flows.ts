@@ -21,13 +21,15 @@ async function main() {
   console.log('Flow created:', id);
 
   // ── 2. Give it a trigger and its steps ───────────────────────────────────
+  // Config values are strings, and unknown keys are ignored without an error.
+  // See `FlowTrigger` and `FlowStep` in src/types.ts for the keys each type reads.
   const flow = await tratto.flows.update(id, {
-    trigger: { type: 'contact_tag_added', config: { tag: 'signed-up' } },
+    trigger: { type: 'contact_tag_added', config: { tagName: 'signed-up' } },
     steps: [
       { id: 'step_1', type: 'send_email', config: { templateId: 'tpl_welcome' } },
-      { id: 'step_2', type: 'wait', config: { duration: '2d' } },
+      { id: 'step_2', type: 'wait', config: { delay: '2', unit: 'days' } },
       { id: 'step_3', type: 'send_email', config: { templateId: 'tpl_tips' } },
-      { id: 'step_4', type: 'update_contact', config: { addTag: 'onboarded' } },
+      { id: 'step_4', type: 'update_contact', config: { action: 'add_tag', tag: 'onboarded' } },
     ],
   });
   console.log(`Configured: trigger ${flow.trigger.type}, ${flow.steps.length} steps`);

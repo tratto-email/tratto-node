@@ -502,7 +502,7 @@ await tratto.flows.update(id, {
   trigger: { type: 'contact_joins_audience', config: { audienceId: 'aud_abc123' } },
   steps: [
     { id: 'step_1', type: 'send_email', config: { templateId: 'tpl_abc123' } },
-    { id: 'step_2', type: 'wait',       config: { delay: '3d' } },
+    { id: 'step_2', type: 'wait',       config: { delay: '3', unit: 'days' } },
     { id: 'step_3', type: 'send_email', config: { templateId: 'tpl_def456' } },
   ],
 });

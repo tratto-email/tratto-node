@@ -1,4 +1,4 @@
-import { BaseResource } from './base';
+import { BaseResource, path } from './base';
 import type { Attachment, AttachmentContent, UploadAttachmentParams } from '../types';
 
 /**
@@ -34,11 +34,11 @@ export class AttachmentsResource extends BaseResource {
 
   /** Metadata only: the bytes are never served back. */
   get(id: string): Promise<Attachment> {
-    return this.fetchData<Attachment>('GET', `/v1/attachments/${id}`);
+    return this.fetchData<Attachment>('GET', path`/v1/attachments/${id}`);
   }
 
   /** Frees its storage at once. Emails already queued with it fail with `attachment_unavailable`. */
   delete(id: string): Promise<void> {
-    return this.fetch<void>('DELETE', `/v1/attachments/${id}`);
+    return this.fetch<void>('DELETE', path`/v1/attachments/${id}`);
   }
 }

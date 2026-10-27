@@ -1,4 +1,4 @@
-import { BaseResource } from './base';
+import { BaseResource, path } from './base';
 import type {
   Campaign,
   CampaignStatsDetail,
@@ -23,11 +23,11 @@ export class CampaignsResource extends BaseResource {
   }
 
   get(id: string): Promise<Campaign> {
-    return this.fetchData<Campaign>('GET', `/v1/campaigns/${id}`);
+    return this.fetchData<Campaign>('GET', path`/v1/campaigns/${id}`);
   }
 
   getStats(id: string): Promise<CampaignStatsDetail> {
-    return this.fetchData<CampaignStatsDetail>('GET', `/v1/campaigns/${id}/stats`);
+    return this.fetchData<CampaignStatsDetail>('GET', path`/v1/campaigns/${id}/stats`);
   }
 
   send(id: string, params?: SendCampaignParams): Promise<{ status: string }> {
@@ -38,7 +38,7 @@ export class CampaignsResource extends BaseResource {
           ? params.scheduledAt.toISOString()
           : params.scheduledAt;
     }
-    return this.fetchData<{ status: string }>('POST', `/v1/campaigns/${id}/send`, { body });
+    return this.fetchData<{ status: string }>('POST', path`/v1/campaigns/${id}/send`, { body });
   }
 
   /**
@@ -54,19 +54,19 @@ export class CampaignsResource extends BaseResource {
   unschedule(id: string): Promise<{ id: string; status: 'draft'; scheduledAt: null }> {
     return this.fetchData<{ id: string; status: 'draft'; scheduledAt: null }>(
       'POST',
-      `/v1/campaigns/${id}/unschedule`,
+      path`/v1/campaigns/${id}/unschedule`,
       { body: {} },
     );
   }
 
   pause(id: string): Promise<{ status: string }> {
-    return this.fetchData<{ status: string }>('POST', `/v1/campaigns/${id}/pause`, { body: {} });
+    return this.fetchData<{ status: string }>('POST', path`/v1/campaigns/${id}/pause`, { body: {} });
   }
 
   testSend(id: string, to: string): Promise<{ emailId: string }> {
     return this.fetchData<{ emailId: string }>(
       'POST',
-      `/v1/campaigns/${id}/test-send`,
+      path`/v1/campaigns/${id}/test-send`,
       { body: { to } },
     );
   }

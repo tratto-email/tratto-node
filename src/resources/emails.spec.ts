@@ -11,6 +11,44 @@ const mock = (data: unknown, status = 200) =>
     json: () => Promise.resolve(data),
   });
 
+describe('path encoding and timeout', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('percent-encodes ids so they cannot change the route', async () => {
+    vi.stubGlobal('fetch', mock({ data: {} }));
+    const tratto = new Tratto(API_KEY);
+    await tratto.emails.get('a/b');
+    await tratto.webhooks.listDeliveries('../x?y#z', { limit: 5 });
+    const calls = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls as [string][];
+    expect(calls[0]![0]).toBe(`${BASE}/v1/emails/a%2Fb`);
+    expect(calls[1]![0]).toBe(`${BASE}/v1/webhooks/..%2Fx%3Fy%23z/deliveries?limit=5`);
+  });
+
+  it('aborts a stalled request after the timeout option with a TrattoError', async () => {
+    vi.stubGlobal('fetch', vi.fn((_url: string, init: RequestInit) =>
+      new Promise((_resolve, reject) => {
+        init.signal?.addEventListener('abort', () => reject(init.signal!.reason));
+      }),
+    ));
+    const tratto = new Tratto(API_KEY, { timeout: 20 });
+    const err = await tratto.emails.get('em_1').catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(TrattoError);
+    expect(err).toMatchObject({ code: 'timeout', statusCode: 0 });
+    expect((err as TrattoError).message).toBe('Request timed out after 20 ms: GET /v1/emails/em_1');
+  });
+
+  it('passes a signal on every request by default', async () => {
+    vi.stubGlobal('fetch', mock({ data: {} }));
+    await new Tratto(API_KEY).emails.get('em_1');
+    const [, init] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('rejects a non-positive timeout', () => {
+    expect(() => new Tratto(API_KEY, { timeout: 0 })).toThrow(/timeout/);
+  });
+});
+
 describe('EmailsResource', () => {
   let tratto: Tratto;
   beforeEach(() => { tratto = new Tratto(API_KEY); });

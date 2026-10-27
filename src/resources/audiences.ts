@@ -1,4 +1,4 @@
-import { BaseResource } from './base';
+import { BaseResource, path } from './base';
 import type {
   Audience,
   CreateAudienceParams,
@@ -18,13 +18,13 @@ export class AudiencesResource extends BaseResource {
   }
 
   get(id: string): Promise<Audience> {
-    return this.fetchData<Audience>('GET', `/v1/audiences/${id}`);
+    return this.fetchData<Audience>('GET', path`/v1/audiences/${id}`);
   }
 
   addContacts(audienceId: string, contactIds: string[]): Promise<AddContactsToAudienceResult> {
     return this.fetchData<AddContactsToAudienceResult>(
       'POST',
-      `/v1/audiences/${audienceId}/contacts`,
+      path`/v1/audiences/${audienceId}/contacts`,
       { body: { contactIds } },
     );
   }

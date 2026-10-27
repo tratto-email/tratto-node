@@ -1,4 +1,4 @@
-import { BaseResource } from './base';
+import { BaseResource, path } from './base';
 import type {
   Flow,
   CreateFlowParams,
@@ -18,22 +18,22 @@ export class FlowsResource extends BaseResource {
   }
 
   get(id: string): Promise<Flow> {
-    return this.fetchData<Flow>('GET', `/v1/flows/${id}`);
+    return this.fetchData<Flow>('GET', path`/v1/flows/${id}`);
   }
 
   update(id: string, params: UpdateFlowParams): Promise<Flow> {
-    return this.fetchData<Flow>('PATCH', `/v1/flows/${id}`, { body: params });
+    return this.fetchData<Flow>('PATCH', path`/v1/flows/${id}`, { body: params });
   }
 
   delete(id: string): Promise<{ id: string }> {
-    return this.fetchData<{ id: string }>('DELETE', `/v1/flows/${id}`);
+    return this.fetchData<{ id: string }>('DELETE', path`/v1/flows/${id}`);
   }
 
   activate(id: string): Promise<Flow> {
-    return this.fetchData<Flow>('POST', `/v1/flows/${id}/activate`, { body: {} });
+    return this.fetchData<Flow>('POST', path`/v1/flows/${id}/activate`, { body: {} });
   }
 
   deactivate(id: string): Promise<Flow> {
-    return this.fetchData<Flow>('POST', `/v1/flows/${id}/deactivate`, { body: {} });
+    return this.fetchData<Flow>('POST', path`/v1/flows/${id}/deactivate`, { body: {} });
   }
 }

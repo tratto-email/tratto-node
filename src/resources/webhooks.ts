@@ -1,4 +1,4 @@
-import { BaseResource } from './base';
+import { BaseResource, path } from './base';
 import type {
   Webhook,
   WebhookDelivery,
@@ -17,7 +17,7 @@ export class WebhooksResource extends BaseResource {
   }
 
   delete(id: string): Promise<void> {
-    return this.fetch<void>('DELETE', `/v1/webhooks/${id}`);
+    return this.fetch<void>('DELETE', path`/v1/webhooks/${id}`);
   }
 
   listDeliveries(
@@ -27,18 +27,18 @@ export class WebhooksResource extends BaseResource {
     const qs = this.buildQuery({ after: params?.after, limit: params?.limit });
     return this.fetch<PaginatedResponse<WebhookDelivery>>(
       'GET',
-      `/v1/webhooks/${id}/deliveries${qs}`,
+      path`/v1/webhooks/${id}/deliveries` + qs,
     );
   }
 
   test(id: string): Promise<{ queued: boolean }> {
-    return this.fetchData<{ queued: boolean }>('POST', `/v1/webhooks/${id}/test`, { body: {} });
+    return this.fetchData<{ queued: boolean }>('POST', path`/v1/webhooks/${id}/test`, { body: {} });
   }
 
   rotateSecret(id: string): Promise<{ secret: string }> {
     return this.fetchData<{ secret: string }>(
       'POST',
-      `/v1/webhooks/${id}/rotate-secret`,
+      path`/v1/webhooks/${id}/rotate-secret`,
       { body: {} },
     );
   }

@@ -1,4 +1,4 @@
-import { BaseResource } from './base';
+import { BaseResource, path } from './base';
 import type {
   SendEmailParams,
   BatchEmailParams,
@@ -44,10 +44,10 @@ export class EmailsResource extends BaseResource {
   }
 
   get(id: string): Promise<EmailDetail> {
-    return this.fetchData<EmailDetail>('GET', `/v1/emails/${id}`);
+    return this.fetchData<EmailDetail>('GET', path`/v1/emails/${id}`);
   }
 
   listEvents(id: string): Promise<EmailEvent[]> {
-    return this.fetchData<EmailEvent[]>('GET', `/v1/emails/${id}/events`);
+    return this.fetchData<EmailEvent[]>('GET', path`/v1/emails/${id}/events`);
   }
 }

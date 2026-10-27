@@ -1,4 +1,4 @@
-import { BaseResource } from './base';
+import { BaseResource, path } from './base';
 import type {
   Template,
   TemplateSummary,
@@ -31,23 +31,23 @@ export class TemplatesResource extends BaseResource {
   }
 
   get(id: string): Promise<Template> {
-    return this.fetchData<Template>('GET', `/v1/templates/${id}`);
+    return this.fetchData<Template>('GET', path`/v1/templates/${id}`);
   }
 
   update(id: string, params: UpdateTemplateParams): Promise<Template> {
-    return this.fetchData<Template>('PATCH', `/v1/templates/${id}`, { body: params });
+    return this.fetchData<Template>('PATCH', path`/v1/templates/${id}`, { body: params });
   }
 
   delete(id: string): Promise<void> {
-    return this.fetch<void>('DELETE', `/v1/templates/${id}`);
+    return this.fetch<void>('DELETE', path`/v1/templates/${id}`);
   }
 
   listVersions(id: string): Promise<TemplateVersionSummary[]> {
-    return this.fetchData<TemplateVersionSummary[]>('GET', `/v1/templates/${id}/versions`);
+    return this.fetchData<TemplateVersionSummary[]>('GET', path`/v1/templates/${id}/versions`);
   }
 
   getVersion(id: string, version: number): Promise<TemplateVersion> {
-    return this.fetchData<TemplateVersion>('GET', `/v1/templates/${id}/versions/${version}`);
+    return this.fetchData<TemplateVersion>('GET', path`/v1/templates/${id}/versions/${version}`);
   }
 
   testSend(
@@ -57,7 +57,7 @@ export class TemplatesResource extends BaseResource {
   ): Promise<{ queued: boolean }> {
     return this.fetchData<{ queued: boolean }>(
       'POST',
-      `/v1/templates/${id}/test-send`,
+      path`/v1/templates/${id}/test-send`,
       { body: { to, variables } },
     );
   }

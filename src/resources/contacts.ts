@@ -1,4 +1,4 @@
-import { BaseResource } from './base';
+import { BaseResource, path } from './base';
 import type {
   Contact,
   CreateContactParams,
@@ -26,7 +26,7 @@ export class ContactsResource extends BaseResource {
   }
 
   update(id: string, params: UpdateContactParams): Promise<{ id: string }> {
-    return this.fetchData<{ id: string }>('PATCH', `/v1/contacts/${id}`, { body: params });
+    return this.fetchData<{ id: string }>('PATCH', path`/v1/contacts/${id}`, { body: params });
   }
 
   importCsv(csvText: string): Promise<{ jobId: string; totalRows: number }> {
@@ -38,6 +38,6 @@ export class ContactsResource extends BaseResource {
   }
 
   getImportJob(jobId: string): Promise<ImportJobStatus> {
-    return this.fetchData<ImportJobStatus>('GET', `/v1/contacts/import/${jobId}`);
+    return this.fetchData<ImportJobStatus>('GET', path`/v1/contacts/import/${jobId}`);
   }
 }

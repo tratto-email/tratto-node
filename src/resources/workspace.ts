@@ -1,4 +1,4 @@
-import { BaseResource } from './base';
+import { BaseResource, path } from './base';
 import type {
   Workspace,
   WorkspaceMember,
@@ -45,7 +45,7 @@ export class WorkspaceResource extends BaseResource {
   }
 
   updateMember(userId: string, params: UpdateMemberParams): Promise<WorkspaceMember> {
-    return this.fetchData<WorkspaceMember>('PATCH', `/v1/workspace/members/${userId}`, {
+    return this.fetchData<WorkspaceMember>('PATCH', path`/v1/workspace/members/${userId}`, {
       body: params,
     });
   }
@@ -56,6 +56,6 @@ export class WorkspaceResource extends BaseResource {
    * succeed and will be removed in the next major version.
    */
   removeMember(userId: string): Promise<void> {
-    return this.fetch<void>('DELETE', `/v1/workspace/members/${userId}`);
+    return this.fetch<void>('DELETE', path`/v1/workspace/members/${userId}`);
   }
 }

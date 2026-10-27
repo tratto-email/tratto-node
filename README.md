@@ -77,7 +77,7 @@ const tratto = new Tratto(apiKey, options?);
 |---|---|---|
 | `apiKey` | `string` | Required. Create one at `https://app.tratto.email/settings/api-keys` (needs an invited account during the private beta). Supports both `tratto_live_…` and `tratto_test_…` keys. |
 | `options.baseUrl` | `string` | Optional. Defaults to `https://api.tratto.email`. |
-| `options.timeout` | `number` | Optional. Per-request timeout in milliseconds. Defaults to `60000` (60 s). A request that takes longer is aborted and throws a `TrattoError` with `code: 'timeout'` (requires `@tratto/email` later than 1.7.0). |
+| `options.timeout` | `number` | Optional. Per-request timeout in milliseconds. Defaults to `60000` (60 s). A request that takes longer is aborted and throws a `TrattoError` with `code: 'timeout'` (requires `@tratto/email` 1.8.0 or later). |
 
 ---
 

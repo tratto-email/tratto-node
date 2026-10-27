@@ -1,5 +1,7 @@
 export { Tratto, TrattoError } from './client';
 export type { TrattoOptions } from './client';
+export { verifyWebhook } from './webhook';
+export type { VerifyWebhookOptions } from './webhook';
 
 export type {
   // Shared

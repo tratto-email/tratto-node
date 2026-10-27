@@ -21,7 +21,7 @@ async function main() {
   // The secret is shown only at creation time — store it in your environment
   console.log('Webhook registered:', id);
   console.log('Signing secret (save this!):', secret);
-  console.log('Verify incoming payloads using X-Tratto-Signature.');
+  console.log('Verify incoming payloads with verifyWebhook(rawBody, X-Tratto-Signature, secret).');
 
   // ── 2. List all webhooks ──────────────────────────────────────────────────
   const hooks = await tratto.webhooks.list();

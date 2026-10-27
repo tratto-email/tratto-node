@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.8.0
+
+- `timeout` client option (milliseconds, default 60000). A request that runs
+  longer throws `TrattoError` with `code: 'timeout'` and `statusCode: 0`.
+  Before, a hung connection blocked the caller indefinitely (#44).
+- Ids placed in URL paths are percent-encoded as a single segment, so an id
+  containing `/`, `?` or `#` can no longer change the route called (#57).
+- `verifyWebhook(payload, header, secret, { toleranceSeconds })` checks the
+  `X-Tratto-Signature` header (`t=<ms>,v1=<hex>`, HMAC-SHA256 of
+  `"{t}.{raw body}"`) in constant time, 5 minute tolerance either way (#56).
+- `emails.cancel(id)` and `emails.reschedule(id, scheduledAt)` for emails
+  still scheduled (`DELETE` / `PATCH /v1/emails/:id`) (#43).
+- Types: `TrattoError.suggestion`, `Workspace.limits` (`WorkspaceLimits`) and
+  the `quota_unavailable` campaign pause reason (#36, #40, #42).
+- Flow examples and JSDoc use the config keys the API reads (`tagName`,
+  `delay` + `unit`, `update_contact` with `action: 'add_tag'`) (#58).
+
 ## 1.7.0
 
 - A non-JSON error response (for example an HTML 413 page for an upload over

@@ -24,6 +24,22 @@ describe('WorkspaceResource', () => {
     expect((result as { name: string }).name).toBe('Acme');
   });
 
+  // Typed access to `limits` without a cast is the point: if the field leaves
+  // the Workspace type, `npm run typecheck` fails here.
+  it('get() exposes the plan limits', async () => {
+    const limits = {
+      domains: 6, emailsPerMonth: null, membersPerAccount: 3, membersPerWorkspace: 3,
+      workspaces: 2, webhooks: true, testSendsPerDay: 50,
+    };
+    vi.stubGlobal('fetch', mock({ data: { ...WS, limits } }));
+    const ws = await tratto.workspace.get();
+    const domains: number | null = ws.limits.domains;
+    const emailsPerMonth: number | null = ws.limits.emailsPerMonth;
+    const webhooks: boolean = ws.limits.webhooks;
+    expect({ domains, emailsPerMonth, webhooks }).toEqual({ domains: 6, emailsPerMonth: null, webhooks: true });
+    expect(ws.limits).toEqual(limits);
+  });
+
   it('update() PATCHes /v1/workspace', async () => {
     vi.stubGlobal('fetch', mock({ data: { ...WS, name: 'Acme Corp' } }));
     await tratto.workspace.update({ name: 'Acme Corp' });

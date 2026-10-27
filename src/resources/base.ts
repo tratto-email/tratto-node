@@ -80,6 +80,7 @@ export abstract class BaseResource {
         code?: string;
         docs?: string;
         details?: unknown[];
+        suggestion?: string;
       };
       throw new TrattoError(
         err.message ?? res.statusText,
@@ -87,6 +88,7 @@ export abstract class BaseResource {
         res.status,
         err.docs,
         err.details,
+        err.suggestion,
       );
     }
 

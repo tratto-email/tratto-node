@@ -238,6 +238,27 @@ A failed email carries `failureReason` (for example `template_not_found` or
 `attachment_unavailable`), the same code as `data.reason` of the `failed`
 webhook event. The set is open: handle unknown values.
 
+
+#### `emails.cancel(id)` and `emails.reschedule(id, scheduledAt)`
+
+Cancel or move an email sent with `scheduledAt` (requires `@tratto/email`
+1.8.0 or later). Both work only while the email is still `scheduled`: any
+other status answers 409 `CONFLICT`.
+
+```ts
+// Move it: a Date or an ISO string, in the future (422 otherwise)
+const { scheduledAt } = await tratto.emails.reschedule('em_abc123', new Date('2030-01-01T09:00:00Z'));
+
+// Cancel it: resolves with no value
+await tratto.emails.cancel('em_abc123');
+```
+
+A scheduled email counts against the quota of the UTC month of its
+`scheduledAt`. Canceling gives those emails back to that month. Rescheduling
+into another month moves them, and answers 429 `QUOTA_EXCEEDED` if that month
+has fewer left; nothing changes. Both can answer 429 `RATE_LIMITED` under
+contention: retry after a short wait.
+
 ---
 
 ### Attachments

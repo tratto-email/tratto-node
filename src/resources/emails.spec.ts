@@ -282,4 +282,49 @@ describe('EmailsResource', () => {
       expect(result).toEqual(events);
     });
   });
+  describe('cancel()', () => {
+    it('DELETEs /v1/emails/:id and resolves on 204', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 204 }));
+      await expect(tratto.emails.cancel('em_1')).resolves.toBeUndefined();
+
+      const [url, init] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
+      expect(url).toBe(`${BASE}/v1/emails/em_1`);
+      expect(init.method).toBe('DELETE');
+      expect(init.body).toBeUndefined();
+    });
+
+    it('throws a TrattoError on 409 when the email is no longer scheduled', async () => {
+      vi.stubGlobal('fetch', mock({ error: { code: 'CONFLICT', message: "Only scheduled emails can be canceled, this one is 'sent'." } }, 409));
+      const err = await tratto.emails.cancel('em_1').catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(TrattoError);
+      expect(err).toMatchObject({ code: 'CONFLICT', statusCode: 409 });
+    });
+  });
+
+  describe('reschedule()', () => {
+    it('PATCHes /v1/emails/:id with scheduledAt as ISO string and unwraps data', async () => {
+      vi.stubGlobal('fetch', mock({ data: { id: 'em_1', scheduledAt: '2030-01-01T09:00:00.000Z' } }));
+      const result = await tratto.emails.reschedule('em_1', new Date('2030-01-01T09:00:00Z'));
+
+      const [url, init] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
+      expect(url).toBe(`${BASE}/v1/emails/em_1`);
+      expect(init.method).toBe('PATCH');
+      expect(JSON.parse(init.body as string)).toEqual({ scheduledAt: '2030-01-01T09:00:00.000Z' });
+      expect(result).toEqual({ id: 'em_1', scheduledAt: '2030-01-01T09:00:00.000Z' });
+    });
+
+    it('sends a string scheduledAt unchanged', async () => {
+      vi.stubGlobal('fetch', mock({ data: { id: 'em_1', scheduledAt: '2030-01-01T09:00:00.000Z' } }));
+      await tratto.emails.reschedule('em_1', '2030-01-01T09:00:00Z');
+      const [, init] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
+      expect(JSON.parse(init.body as string)).toEqual({ scheduledAt: '2030-01-01T09:00:00Z' });
+    });
+
+    it('throws a TrattoError on 429 QUOTA_EXCEEDED for a full target month', async () => {
+      vi.stubGlobal('fetch', mock({ error: { code: 'QUOTA_EXCEEDED', message: 'Monthly quota exceeded.' } }, 429));
+      const err = await tratto.emails.reschedule('em_1', '2030-02-01T09:00:00Z').catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(TrattoError);
+      expect(err).toMatchObject({ code: 'QUOTA_EXCEEDED', statusCode: 429 });
+    });
+  });
 });

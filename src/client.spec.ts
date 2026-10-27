@@ -4,8 +4,8 @@ import { Tratto, TrattoError } from './client';
 const API_KEY = 'tratto_test_key';
 
 
-describe('workspace senders (tipi, #28)', () => {
-  it('manda una scrittura parziale, e il null che rimette in eredita', async () => {
+describe('workspace senders (types, #28)', () => {
+  it('sends a partial write, and the null that restores inheritance', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -17,11 +17,11 @@ describe('workspace senders (tipi, #28)', () => {
 
     const tratto = new Tratto(API_KEY);
 
-    // Un tipo solo: gli altri due non si toccano.
+    // One type only: the other two are left untouched.
     await tratto.workspace.update({
       senders: { marketing: { fromEmail: 'news@acme.test', fromName: 'Acme' } },
     });
-    // null: quel tipo torna a ereditare il mittente generale del workspace.
+    // null: that type goes back to inheriting the workspace's general sender.
     await tratto.workspace.update({ senders: { marketing: null } });
 
     const bodies = fetchMock.mock.calls.map((c) => JSON.parse(String((c[1] as RequestInit).body)));

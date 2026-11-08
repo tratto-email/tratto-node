@@ -7,7 +7,7 @@ const mock = (data: unknown, status = 200) =>
   vi.fn().mockResolvedValue({ ok: status >= 200 && status < 300, status, statusText: 'OK', json: () => Promise.resolve(data) });
 const fetchCalls = () => (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls;
 
-const FLOW = { id: 'flw_1', name: 'Welcome', status: 'draft', trigger: { type: 'manual', config: {} }, steps: [], enrollments: 0, createdAt: '', updatedAt: '' };
+const FLOW = { id: 'flw_1', name: 'Welcome', status: 'draft', trigger: { type: 'manual', config: {} }, steps: [], enrollments: 0, failedEnrollments: 1, createdAt: '', updatedAt: '' };
 
 describe('FlowsResource', () => {
   let tratto: Tratto;
@@ -41,9 +41,10 @@ describe('FlowsResource', () => {
 
   it('get() GETs /v1/flows/:id', async () => {
     vi.stubGlobal('fetch', mock({ data: FLOW }));
-    await tratto.flows.get('flw_1');
+    const result = await tratto.flows.get('flw_1');
     const [url] = fetchCalls()[0] as [string];
     expect(url).toBe(`${BASE}/v1/flows/flw_1`);
+    expect(result.failedEnrollments).toBe(1);
   });
 
   it('update() PATCHes /v1/flows/:id', async () => {

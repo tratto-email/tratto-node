@@ -586,6 +586,8 @@ export interface Flow {
   trigger: FlowTrigger;
   steps: FlowStep[];
   enrollments: number;
+  /** Enrollments that stopped as failed (a step failed for good, e.g. webhook_call retries exhausted). Counted in `enrollments`. Always present with API 0.31.0 or later. */
+  failedEnrollments?: number;
   createdAt: string;
   updatedAt: string;
 }

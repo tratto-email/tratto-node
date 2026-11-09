@@ -56,6 +56,13 @@ describe('CampaignsResource', () => {
     expect(campaign.pausedReason).toBe(reason);
   });
 
+  it('get() types the template_unsafe pause reason', async () => {
+    vi.stubGlobal('fetch', mock({ data: { ...CAMPAIGN, status: 'paused', pausedReason: 'template_unsafe' } }));
+    const campaign = await tratto.campaigns.get('cmp_1');
+    const reason: CampaignPausedReason | null = 'template_unsafe';
+    expect(campaign.pausedReason).toBe(reason);
+  });
+
   it('getStats() GETs /v1/campaigns/:id/stats', async () => {
     vi.stubGlobal('fetch', mock({ data: { campaignId: 'cmp_1', status: 'completed', stats: {}, rates: {} } }));
     await tratto.campaigns.getStats('cmp_1');

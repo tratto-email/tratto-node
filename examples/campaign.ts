@@ -78,7 +78,8 @@ async function main() {
     }
   } else if (campaign.status === 'sending') {
     // A campaign can also pause itself — check `pausedReason` for why:
-    // quota_exceeded, schedule_missed or bounce_rate.
+    // quota_exceeded, quota_unavailable, schedule_missed, bounce_rate or
+    // template_unsafe.
     const paused = await tratto.campaigns.pause(campaignId);
     console.log('Paused:', paused.status);
   }

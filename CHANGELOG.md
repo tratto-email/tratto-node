@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.1
+
+- Types: `Flow.failedEnrollments`, the number of enrollments that stopped as
+  failed (a step failed for good, for example `webhook_call` retries
+  exhausted). Returned by the API from 0.31.0 (#80).
+
 ## 1.8.0
 
 - `timeout` client option (milliseconds, default 60000). A request that runs

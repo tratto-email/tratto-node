@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.2
+
+- Types: the `template_unsafe` campaign pause reason. The campaign's template
+  failed HTML sanitization, so nothing was sent (#83).
+
 ## 1.8.1
 
 - Types: `Flow.failedEnrollments`, the number of enrollments that stopped as

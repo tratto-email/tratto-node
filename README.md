@@ -397,8 +397,9 @@ await tratto.campaigns.pause(id);
 // Why a campaign is paused: 'quota_exceeded', 'schedule_missed',
 // 'bounce_rate' (it stopped itself on too many permanent bounces),
 // 'quota_unavailable' (the quota could not be read, an error on Tratto's
-// side; resumable; typed from @tratto/email 1.8.0), or null when it was
-// paused by hand.
+// side; resumable; typed from @tratto/email 1.8.0), 'template_unsafe'
+// (the template failed HTML sanitization; fix it before resuming), or null
+// when it was paused by hand.
 const campaign = await tratto.campaigns.get(id);
 if (campaign.pausedReason === 'bounce_rate') {
   console.log('Stopped: too many bounces. Clean the list before resuming.');

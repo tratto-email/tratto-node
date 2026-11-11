@@ -284,12 +284,15 @@ export type CampaignStatus = 'draft' | 'sending' | 'scheduled' | 'paused' | 'com
  * - `bounce_rate` — too many permanent bounces, the campaign stopped itself.
  * - `quota_unavailable`: the monthly quota could not be read (an error on
  *   Tratto's side, not an exhausted quota). The campaign can be resumed.
+ * - `template_unsafe` — the campaign's template failed HTML sanitization, so
+ *   nothing was sent. Fix the template before resuming.
  */
 export type CampaignPausedReason =
   | 'quota_exceeded'
   | 'schedule_missed'
   | 'bounce_rate'
-  | 'quota_unavailable';
+  | 'quota_unavailable'
+  | 'template_unsafe';
 
 export interface CampaignStats {
   total: number;

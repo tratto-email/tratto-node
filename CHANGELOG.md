@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.0
+
+- Types: `EmailEvent.recipient`, the address that bounced or complained.
+  Present only on `bounced` and `complained` events of `emails.get` and
+  `emails.getEvents`. Returned by the API from 0.40.0 (#86).
+
 ## 1.8.2
 
 - Types: the `template_unsafe` campaign pause reason. The campaign's template

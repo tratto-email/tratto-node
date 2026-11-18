@@ -122,6 +122,8 @@ export type EmailFailureReason =
 export interface EmailEvent {
   type: string;
   occurredAt: string;
+  /** Present only on `bounced` and `complained` events: the address that bounced or complained. */
+  recipient?: string;
   data?: Record<string, unknown>;
 }
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Tratto, TrattoError } from '../client';
-import type { BatchEmailParams } from '../types';
+import type { BatchEmailParams, EmailEvent } from '../types';
 
 const API_KEY = 'tratto_test_key';
 const BASE = 'https://api.tratto.email';
@@ -280,6 +280,18 @@ describe('EmailsResource', () => {
       const [url] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string];
       expect(url).toBe(`${BASE}/v1/emails/em_1/events`);
       expect(result).toEqual(events);
+    });
+
+    it('types recipient on bounced and complained events', async () => {
+      const events: EmailEvent[] = [
+        { type: 'delivered', occurredAt: '2025-01-01T00:00:00Z' },
+        { type: 'bounced', occurredAt: '2025-01-01T00:00:01Z', recipient: 'a@example.com' },
+      ];
+      vi.stubGlobal('fetch', mock({ data: events }));
+      const result = await tratto.emails.listEvents('em_1');
+      const recipient: string | undefined = result[1].recipient;
+      expect(recipient).toBe('a@example.com');
+      expect(result[0].recipient).toBeUndefined();
     });
   });
   describe('cancel()', () => {

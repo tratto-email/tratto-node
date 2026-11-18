@@ -234,6 +234,9 @@ console.log(email.events);
 const events = await tratto.emails.listEvents('em_abc123');
 ```
 
+A `bounced` or `complained` event carries `recipient`, the address that
+bounced or complained. Other event types do not have it.
+
 A failed email carries `failureReason` (for example `template_not_found` or
 `attachment_unavailable`), the same code as `data.reason` of the `failed`
 webhook event. The set is open: handle unknown values.
